@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import PoseFeedback from '@/components/PoseFeedback'
 import { motion } from 'framer-motion'
-import { useState } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { CheckCircle, Play, Pause, RotateCcw } from 'lucide-react'
 
 export default function ExerciseExecution() {
@@ -14,6 +14,66 @@ export default function ExerciseExecution() {
   const [currentStep, setCurrentStep] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [showCompletion, setShowCompletion] = useState(false)
+  const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null)
+  const [hasPermission, setHasPermission] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+
+  const videoRef = useCallback((node: HTMLVideoElement) => {
+    if (node !== null) {
+      setVideoElement(node);
+    }
+  }, [])
+
+  const startCamera = async () => {
+    try {
+      setError(null);
+      
+      // Stop any existing stream
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+      }
+
+      // Request camera access
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: 'user'
+        }
+      });
+
+      // Store stream reference
+      streamRef.current = stream;
+
+      // Set up video element
+      if (videoElement) {
+        videoElement.srcObject = stream;
+        try {
+          await videoElement.play();
+          setHasPermission(true);
+        } catch (playError) {
+          console.error('Error playing video:', playError);
+          setError('Failed to start video playback');
+        }
+      } else {
+        setError('Video element not initialized');
+      }
+    } catch (err: any) {
+      console.error('Camera access error:', err);
+      setError(err.message || 'Failed to access camera');
+      setHasPermission(false);
+    }
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+      }
+    };
+  }, []);
   
   const exercise = exercises.find(ex => ex.id === params.id)
   
@@ -58,7 +118,45 @@ export default function ExerciseExecution() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <PoseFeedback />
+          <div className="relative w-full h-[480px] bg-gray-100 rounded-lg overflow-hidden">
+            {!hasPermission ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                <p className="text-gray-500">{error || 'Camera access required'}</p>
+                <button
+                  onClick={startCamera}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                >
+                  Start Camera
+                </button>
+              </div>
+            ) : (
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block',
+                  backgroundColor: 'black'
+                }}
+                onLoadedMetadata={(e) => {
+                  const video = e.target as HTMLVideoElement;
+                  video.play().catch(console.error);
+                }}
+              />
+            )}
+            {error && (
+              <div className="absolute top-2 left-2 right-2 bg-red-500 text-white px-3 py-2 rounded text-sm">
+                {error}
+              </div>
+            )}
+            <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+              {hasPermission ? 'Camera Active' : 'Camera Inactive'}
+            </div>
+          </div>
         </motion.div>
         
         {/* Instructions and controls section */}
