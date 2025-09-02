@@ -1,0 +1,41 @@
+# Exercise Configuration File
+# Format: EXERCISE_NAME
+# RULE: joint1,joint2,joint3|min_angle,max_angle|description|weight
+
+SHOULDER_RAISE
+RULE: left_shoulder,left_elbow,left_wrist|160,180|Left arm should be straight up|1.5
+RULE: right_shoulder,right_elbow,right_wrist|160,180|Right arm should be straight up|1.5
+RULE: left_shoulder,nose,right_shoulder|170,190|Keep shoulders level|1.0
+
+LEFT_ARM_RAISE
+RULE: left_shoulder,left_elbow,left_wrist|160,180|Left arm should be fully extended|2.0
+RULE: left_hip,left_shoulder,left_elbow|80,100|Left arm should be raised to shoulder height or above|2.5
+RULE: left_shoulder,nose,right_shoulder|165,195|Keep shoulders level - don't lean|1.5
+RULE: right_shoulder,right_elbow,right_wrist|160,200|Right arm should remain relaxed at side|1.0
+RULE: right_hip,right_shoulder,right_elbow|160,200|Right arm should stay down|1.2
+
+RIGHT_ARM_RAISE
+RULE: right_shoulder,right_elbow,right_wrist|160,180|Right arm should be fully extended|2.0
+RULE: right_hip,right_shoulder,right_elbow|80,100|Right arm should be raised to shoulder height or above|2.5
+RULE: left_shoulder,nose,right_shoulder|165,195|Keep shoulders level - don't lean|1.5
+RULE: left_shoulder,left_elbow,left_wrist|160,200|Left arm should remain relaxed at side|1.0
+RULE: left_hip,left_shoulder,left_elbow|160,200|Left arm should stay down|1.2
+
+SQUAT
+RULE: left_hip,left_knee,left_ankle|80,110|Left knee bent at proper angle|2.0
+RULE: right_hip,right_knee,right_ankle|80,110|Right knee bent at proper angle|2.0
+RULE: left_shoulder,left_hip,left_knee|160,190|Keep back straight|1.5
+
+ARM_STRETCH
+RULE: left_shoulder,left_elbow,left_wrist|170,190|Left arm should be extended|1.0
+RULE: right_shoulder,right_elbow,right_wrist|170,190|Right arm should be extended|1.0
+RULE: left_wrist,left_shoulder,right_shoulder|85,95|Arms should be perpendicular to body|1.2
+
+STANDING_BALANCE
+RULE: left_shoulder,left_hip,left_knee|170,190|Maintain upright posture|1.5
+RULE: right_shoulder,right_hip,right_knee|170,190|Maintain upright posture|1.5
+RULE: left_shoulder,nose,right_shoulder|170,190|Keep shoulders level|1.0
+
+NECK_ROTATION
+RULE: left_ear,nose,right_ear|160,200|Keep head aligned|1.0
+RULE: left_shoulder,nose,right_shoulder|170,190|Keep shoulders stable|1.2
