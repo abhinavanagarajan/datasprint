@@ -10,6 +10,7 @@ export const usePostureAnalysis = (serverUrl = 'ws://localhost:8000') => {
   const [errors, setError] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [imageSrc, setImageSrc] = useState(null);
+  const [landmarks, setLandmarks] = useState(null);
   
   const wsRef = useRef(null);
   const videoRef = useRef(null);
@@ -95,6 +96,7 @@ export const usePostureAnalysis = (serverUrl = 'ws://localhost:8000') => {
     console.log('Received message:', message);
     const imgbase = message.data.annotated_frame;
     setImageSrc(imgbase);
+    setLandmarks(message.data.landmarks);
 
     switch (type) {
       case 'session_info':
@@ -274,6 +276,7 @@ export const usePostureAnalysis = (serverUrl = 'ws://localhost:8000') => {
     errors,
     isAnalyzing,
     imageSrc,
+    landmarks,
     
     // Refs for components
     videoRef,

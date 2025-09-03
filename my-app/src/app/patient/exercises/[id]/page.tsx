@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import PoseFeedback from '@/components/PoseFeedback'
 import { usePostureAnalysis } from "@/hooks/usePostureAnalysis";
+import  PaperDoll  from "@/components/PaperDoll";
 import { motion } from 'framer-motion'
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { CheckCircle, Play, Pause, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -30,6 +31,7 @@ export default function ExerciseExecution() {
     errors,
     isAnalyzing,
     imageSrc,
+    landmarks,
     videoRef,
     canvasRef,
     connect,
@@ -205,20 +207,7 @@ export default function ExerciseExecution() {
           </div> */}
 
           <div className="relative w-full h-[720px] bg-gray-100 rounded-lg overflow-hidden">
-            <video
-              ref={videoRefs}
-              autoPlay
-              playsInline
-              muted
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                display: 'block',
-                backgroundColor: 'black'
-              }}
-            />
-            <canvas ref={canvasRef} style={{ display: 'none' }} />
+            <PaperDoll landmarks={landmarks} />
 
             
             {!hasPermission && (
@@ -320,12 +309,29 @@ export default function ExerciseExecution() {
             <CheckCircle className="h-5 w-5 mr-2" />
             Complete Exercise
           </button>
-          <div className="rounded-full mt-5">
+          {/* <div className="rounded-full mt-5">
           {imageSrc ? (
             <img src={imageSrc} alt="From hook" className="w-full h-full object-cover rounded" />
           ) : (
             <p>No image yet</p>
           )}
+          </div> */}
+          <div className="rounded-full mt-5 w-auto h-auto">
+            
+            <video
+              ref={videoRefs}
+              autoPlay
+              playsInline
+              muted
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+                backgroundColor: 'black'
+              }}
+            />
+            <canvas ref={canvasRef} style={{ display: 'none' }} />
           </div>
         </motion.div>
       </div>

@@ -214,6 +214,17 @@ class PhysiotherapyPostureChecker:
             
             # Process pose
             results = self.pose.process(rgb_frame)
+
+            landmarks_data = []
+            if results.pose_landmarks:
+                for lm in results.pose_landmarks.landmark:
+                    landmarks_data.append({
+                        "x": lm.x,
+                        "y": lm.y,
+                        "z": lm.z,
+                        "visibility": lm.visibility
+                    })
+
             
             # Evaluate posture
             score = self.evaluate_posture(results)
@@ -254,7 +265,8 @@ class PhysiotherapyPostureChecker:
                 "feedback_messages": score.feedback_messages,
                 "audio_feedback": audio_feedback,
                 "annotated_frame": f"data:image/jpeg;base64,{annotated_base64}",
-                "individual_scores": score.individual_scores
+                "individual_scores": score.individual_scores,
+                "landmarks": landmarks_data
             }
             
         except Exception as e:
