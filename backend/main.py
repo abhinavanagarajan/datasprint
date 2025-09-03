@@ -78,7 +78,7 @@ async def get_exercises():
         temp_checker.close()
         return {"exercises": exercises}
     except Exception as e:
-        logger.error(f"Error getting exercises: {e}")
+        #logger.error(f"Error getting exercises: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/session")
@@ -170,7 +170,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
 
 async def handle_websocket_message(websocket: WebSocket, session_id: str, message: Dict):
     """Handle different types of WebSocket messages."""
-    logger.info(f"Received message for session {session_id}: {message}")
+    #logger.info(f"Received message for session {session_id}: {message}")
     message_type = message.get("type")
     data = message.get("data", {})
     
@@ -187,14 +187,13 @@ async def handle_websocket_message(websocket: WebSocket, session_id: str, messag
             frame_data = data.get("frame")
             if not frame_data:
                 error_msg = {"type": "error", "data": {"error": "No frame data provided"}}
-                logger.warning(f"Frame data missing in session {session_id}")
+                #logger.warning(f"Frame data missing in session {session_id}")
                 await websocket.send_text(json.dumps(error_msg))
                 return
             
             # Analyze posture
-            logger.info(f"Processing frame for session {session_id}")
+            #logger.info(f"Processing frame for session {session_id}")
             result = checker.process_frame_base64(frame_data)
-            
             # Send result back to client
             response = {
                 "type": "analysis_result",

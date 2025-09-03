@@ -57,7 +57,7 @@ class PhysiotherapyPostureChecker:
         self.max_history = 30  # frames
         self.correct_pose_threshold = 0.8
         self.feedback_cooldown = 0
-        self.max_feedback_cooldown = 30  # frames between audio feedback
+        self.max_feedback_cooldown = 300  # frames between audio feedback
         
     def calculate_angle(self, p1: Tuple[float, float], p2: Tuple[float, float], 
                        p3: Tuple[float, float]) -> float:

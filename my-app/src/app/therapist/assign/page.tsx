@@ -34,7 +34,7 @@ export default function TherapistAssign() {
       <motion.h1 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-3xl font-bold text-gray-900 mb-8"
+        className="text-3xl font-bold text-gray-100 mb-8"
       >
         Assign Exercises
       </motion.h1>
@@ -51,7 +51,7 @@ export default function TherapistAssign() {
             <select 
               value={selectedPatient}
               onChange={(e) => setSelectedPatient(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 text-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Choose a patient</option>
               {patients.map(patient => (
@@ -65,7 +65,7 @@ export default function TherapistAssign() {
             <select 
               value={selectedExercise}
               onChange={(e) => setSelectedExercise(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 text-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Choose an exercise</option>
               {exercises.map(exercise => (
@@ -84,7 +84,7 @@ export default function TherapistAssign() {
               max="10" 
               value={sets}
               onChange={(e) => setSets(parseInt(e.target.value))}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           
@@ -96,7 +96,7 @@ export default function TherapistAssign() {
               max="50" 
               value={reps}
               onChange={(e) => setReps(parseInt(e.target.value))}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 text-gray-800 rounded-lg focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           
@@ -108,7 +108,7 @@ export default function TherapistAssign() {
               max="300" 
               value={duration}
               onChange={(e) => setDuration(parseInt(e.target.value))}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-800 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
@@ -128,7 +128,7 @@ export default function TherapistAssign() {
         transition={{ delay: 0.2 }}
         className="bg-white p-6 rounded-xl shadow-md mt-8"
       >
-        <h2 className="text-xl font-semibold mb-4">Recently Assigned Exercises</h2>
+        <h2 className="text-xl text-gray-800 font-semibold mb-4">Recently Assigned Exercises</h2>
         
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -141,7 +141,7 @@ export default function TherapistAssign() {
                 <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Date</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-200 text-gray-800">
               <tr>
                 <td className="px-4 py-3 text-sm">John Doe</td>
                 <td className="px-4 py-3 text-sm">Arm Curls</td>

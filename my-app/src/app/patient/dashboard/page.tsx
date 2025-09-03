@@ -68,9 +68,9 @@ export default function PatientDashboard() {
         >
           <div className="inline-flex items-center bg-white/70 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 mb-4">
             <Sparkles className="h-4 w-4 text-indigo-600 mr-2" />
-            <span className="text-sm font-medium text-gray-700">Welcome back to your journey</span>
+            <span className="text-sm font-medium text-gray-700">Welcome back</span>
           </div>
-          <h1 className="text-5xl font-extrabold bg-gradient-to-r from-gray-900 via-indigo-900 to-purple-900 bg-clip-text text-transparent mb-4">
+          <h1 className="text-5xl font-extrabold bg-gradient-to-r py-4 from-gray-900 via-indigo-900 to-purple-900 bg-clip-text text-transparent mb-6">
             Your Progress Hub
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -126,9 +126,9 @@ export default function PatientDashboard() {
               <h2 className="text-3xl font-bold text-gray-900 mb-2">Your Exercise Journey</h2>
               <p className="text-gray-600">Practice makes progress. Every session counts.</p>
             </div>
-            <div className="hidden sm:flex items-center space-x-3">
-              <div className="h-2 w-2 rounded-full bg-green-400 animate-pulse"></div>
-              <span className="text-sm text-gray-500">Live progress tracking</span>
+            <div className="hidden sm:flex items-center backdrop-blur-md bg-white/10 px-3 py-2 rounded-full space-x-3">
+              <div className="h-2 w-2 rounded-full  bg-green-400 animate-pulse"></div>
+              <span className="text-sm text-gray-600">Live progress tracking</span>
             </div>
           </div>
           

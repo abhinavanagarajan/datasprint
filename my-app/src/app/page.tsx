@@ -72,7 +72,7 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.8, rotateX: 90 }}
             animate={{ opacity: 1, scale: 1, rotateX: 0 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
-            className="space-y-8 perspective-1000"
+            className="space-y-8 perspective-1000 "
           >
             <h1 className="text-6xl md:text-8xl font-black leading-none tracking-tight">
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-400 animate-pulse">
@@ -93,7 +93,7 @@ export default function Home() {
               className="relative"
             >
               <p className="text-xl md:text-2xl text-cyan-100 max-w-3xl mx-auto leading-relaxed font-light">
-                🌀 Step through the portal to the future of physical therapy 🌀
+                 Step through the portal to the future of physical therapy
                 <br />
                 <span className="text-lg text-blue-200 mt-4 block">
                   Where healing meets technology in perfect harmony
@@ -114,11 +114,12 @@ export default function Home() {
               className="group relative px-12 py-6 rounded-full font-bold text-xl transition-all duration-500 overflow-hidden portal-button"
             >
               {/* Rotating border effect */}
-              <div className="absolute inset-0 rounded-full bg-gradient-conic from-cyan-400 via-blue-500 to-purple-500 animate-spin-slow"></div>
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 animate-spin-slow"></div>
+
               <div className="absolute inset-1 rounded-full bg-black"></div>
               
-              <div className="relative text-white group-hover:text-cyan-300 transition-colors duration-300 z-10">
-                🎮 PATIENT PORTAL
+              <div className="relative text-white group-hover:text-cyan-300 rounded-full  transition-colors duration-300 z-10">
+                PATIENTS
               </div>
               
               {/* Glowing effect */}
@@ -130,11 +131,11 @@ export default function Home() {
               className="group relative px-12 py-6 rounded-full font-bold text-xl transition-all duration-500 overflow-hidden portal-button"
             >
               {/* Rotating border effect */}
-              <div className="absolute inset-0 rounded-full bg-gradient-conic from-emerald-400 via-green-500 to-blue-500 animate-spin-slow"></div>
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-400 via-green-500 to-blue-500 animate-spin-slow"></div>
               <div className="absolute inset-1 rounded-full bg-black"></div>
               
               <div className="relative text-white group-hover:text-emerald-300 transition-colors duration-300 z-10">
-                👩‍⚕️ THERAPIST PORTAL
+                THERAPISTS
               </div>
               
               {/* Glowing effect */}

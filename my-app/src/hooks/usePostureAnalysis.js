@@ -9,6 +9,7 @@ export const usePostureAnalysis = (serverUrl = 'ws://localhost:8000') => {
   const [lastResult, setLastResult] = useState(null);
   const [errors, setError] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [imageSrc, setImageSrc] = useState(null);
   
   const wsRef = useRef(null);
   const videoRef = useRef(null);
@@ -92,6 +93,9 @@ export const usePostureAnalysis = (serverUrl = 'ws://localhost:8000') => {
   const handleWebSocketMessage = useCallback((message) => {
     const { type, data } = message;
     console.log('Received message:', message);
+    const imgbase = message.data.annotated_frame;
+    setImageSrc(imgbase);
+
     switch (type) {
       case 'session_info':
         setAvailableExercises(data.exercises);
@@ -269,6 +273,7 @@ export const usePostureAnalysis = (serverUrl = 'ws://localhost:8000') => {
     lastResult,
     errors,
     isAnalyzing,
+    imageSrc,
     
     // Refs for components
     videoRef,

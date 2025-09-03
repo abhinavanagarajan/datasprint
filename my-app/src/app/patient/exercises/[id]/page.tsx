@@ -7,7 +7,7 @@ import PoseFeedback from '@/components/PoseFeedback'
 import { usePostureAnalysis } from "@/hooks/usePostureAnalysis";
 import { motion } from 'framer-motion'
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { CheckCircle, Play, Pause, RotateCcw } from 'lucide-react'
+import { CheckCircle, Play, Pause, ChevronLeft, ChevronRight } from 'lucide-react'
 import { video } from 'framer-motion/client';
 
 export default function ExerciseExecution() {
@@ -29,6 +29,7 @@ export default function ExerciseExecution() {
     lastResult,
     errors,
     isAnalyzing,
+    imageSrc,
     videoRef,
     canvasRef,
     connect,
@@ -146,17 +147,17 @@ export default function ExerciseExecution() {
   }
   
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-7xl max-h-screen mx-auto px-4 py-8">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <h1 className="text-3xl font-bold text-gray-900">{exercise.title}</h1>
+        <h1 className="text-3xl font-bold text-gray-200">{exercise.title}</h1>
         <p className="text-gray-600 mt-2">{exercise.description}</p>
       </motion.div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-h-screen">
         {/* Video and feedback section */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
@@ -203,7 +204,7 @@ export default function ExerciseExecution() {
             </div>
           </div> */}
 
-          <div className="relative w-full h-[480px] bg-gray-100 rounded-lg overflow-hidden">
+          <div className="relative w-full h-[720px] bg-gray-100 rounded-lg overflow-hidden">
             <video
               ref={videoRefs}
               autoPlay
@@ -254,7 +255,7 @@ export default function ExerciseExecution() {
           transition={{ delay: 0.2 }}
           className="bg-white p-6 rounded-xl shadow-md"
         >
-          <h2 className="text-xl font-semibold mb-4">Instructions</h2>
+          <h2 className="text-xl font-semibold text-gray-600 mb-4">Instructions</h2>
           
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
@@ -263,9 +264,9 @@ export default function ExerciseExecution() {
                 <button 
                   onClick={() => setCurrentStep(prev => Math.max(0, prev - 1))}
                   disabled={currentStep === 0}
-                  className="p-2 bg-gray-100 rounded-lg disabled:opacity-50"
+                  className="p-2 rounded-lg disabled:opacity-50"
                 >
-                  <RotateCcw className="h-5 w-5" />
+                  <ChevronLeft className="h-5 w-5 text-gray-400" />
                 </button>
                 <button 
                   onClick={() => setIsPlaying(prev => !prev)}
@@ -276,9 +277,9 @@ export default function ExerciseExecution() {
                 <button 
                   onClick={() => setCurrentStep(prev => Math.min(exercise.instructions.length - 1, prev + 1))}
                   disabled={currentStep === exercise.instructions.length - 1}
-                  className="p-2 bg-gray-100 rounded-lg disabled:opacity-50"
+                  className="p-2  rounded-lg disabled:opacity-50"
                 >
-                  <RotateCcw className="h-5 w-5 transform rotate-180" />
+                  <ChevronRight className="h-5 w-5 text-gray-400 " />
                 </button>
               </div>
             </div>
@@ -300,15 +301,15 @@ export default function ExerciseExecution() {
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="bg-gray-50 p-3 rounded-lg text-center">
               <div className="text-sm text-gray-500">Sets</div>
-              <div className="text-lg font-semibold">{exercise.sets}</div>
+              <div className="text-lg text-gray-800 font-semibold">{exercise.sets}</div>
             </div>
             <div className="bg-gray-50 p-3 rounded-lg text-center">
               <div className="text-sm text-gray-500">Reps</div>
-              <div className="text-lg font-semibold">{exercise.reps}</div>
+              <div className="text-lg text-gray-800 font-semibold">{exercise.reps}</div>
             </div>
             <div className="bg-gray-50 p-3 rounded-lg text-center">
               <div className="text-sm text-gray-500">Duration</div>
-              <div className="text-lg font-semibold">{exercise.duration}s</div>
+              <div className="text-lg text-gray-800 font-semibold">{exercise.duration}s</div>
             </div>
           </div>
           
@@ -319,6 +320,13 @@ export default function ExerciseExecution() {
             <CheckCircle className="h-5 w-5 mr-2" />
             Complete Exercise
           </button>
+          <div className="rounded-full mt-5">
+          {imageSrc ? (
+            <img src={imageSrc} alt="From hook" className="w-full h-full object-cover rounded" />
+          ) : (
+            <p>No image yet</p>
+          )}
+          </div>
         </motion.div>
       </div>
       
@@ -335,13 +343,16 @@ export default function ExerciseExecution() {
             className="bg-white p-8 rounded-xl text-center max-w-md"
           >
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold mb-2">Exercise Completed!</h3>
+            <h3 className="text-2xl text-gray-600 font-bold mb-2">Exercise Completed!</h3>
             <p className="text-gray-600 mb-4">Great job completing {exercise.title}!</p>
             <button 
-              onClick={() => setShowCompletion(false)}
+              onClick={() => {
+                window.location.href = "/patient/dashboard";
+                setShowCompletion(false);
+              }}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium"
             >
-              Continue
+              Continue 
             </button>
           </motion.div>
         </motion.div>
