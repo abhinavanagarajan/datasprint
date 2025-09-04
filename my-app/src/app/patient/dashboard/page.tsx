@@ -6,12 +6,22 @@ import ExerciseCard from '@/components/ExerciseCard'
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useUser } from '@clerk/nextjs'
 import { TrendingUp, Target, Calendar, Award, Sparkles, ChevronRight, FileText, Brain, Upload, ArrowRight } from 'lucide-react'
+
+interface RecommendedExercise {
+  name: string
+  sets: number
+  reps: number
+  duration: number
+  confidence: number
+}
 
 export default function PatientDashboard() {
   const { exercises, progress, streak } = useStore()
+  const { user } = useUser()
   const [hasInjuryReport, setHasInjuryReport] = useState(false)
-  const [recommendations, setRecommendations] = useState([])
+  const [recommendations, setRecommendations] = useState<RecommendedExercise[]>([])
   
   useEffect(() => {
     // Check if user has uploaded injury report
@@ -27,6 +37,9 @@ export default function PatientDashboard() {
   const completionRate = totalExercises > 0 ? Math.round((completedExercises / totalExercises) * 100) : 0
   
   const todayProgress = progress.find(p => p.date === new Date().toISOString().split('T')[0])
+  
+  // Get user's first name or fallback to "Patient"
+  const userName = user?.firstName || user?.username || "Patient"
   
   const stats = [
     {
@@ -82,7 +95,7 @@ export default function PatientDashboard() {
           >
             <div className="inline-flex items-center bg-cyan-500/10 backdrop-blur-sm px-6 py-3 rounded-full border border-cyan-400/30 mb-6">
               <Sparkles className="h-5 w-5 text-cyan-400 mr-2" />
-              <span className="text-sm font-medium text-cyan-300">Welcome to your rehabilitation journey</span>
+              <span className="text-sm font-medium text-cyan-300">Welcome back, {userName}!</span>
             </div>
             <h1 className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-400 mb-6">
               🏥 PATIENT DASHBOARD
@@ -339,7 +352,7 @@ export default function PatientDashboard() {
                   <Brain className="w-8 h-8 text-indigo-600 mr-3" />
                   AI Recommended Exercises
                 </h2>
-                <p className="text-gray-600">Personalized based on your injury report</p>
+                <p className="text-gray-600">Top 3 exercises personalized based on your injury report</p>
               </div>
               <Link 
                 href="/patient/exercises"
@@ -350,8 +363,8 @@ export default function PatientDashboard() {
               </Link>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {recommendations.slice(0, 4).map((exercise, index) => (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {recommendations.map((exercise, index) => (
                 <motion.div
                   key={index}
                   className="bg-white/80 backdrop-blur-xl border border-white/20 p-6 rounded-2xl shadow-lg"
@@ -361,16 +374,14 @@ export default function PatientDashboard() {
                 >
                   <div className="flex items-start justify-between mb-4">
                     <h3 className="text-lg font-bold text-gray-900">{exercise.name}</h3>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      exercise.difficulty === 'Beginner' ? 'bg-green-100 text-green-800' :
-                      exercise.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {exercise.difficulty}
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                      {(exercise.confidence * 100).toFixed(0)}% Match
                     </span>
                   </div>
                   
-                  <p className="text-gray-600 mb-4 text-sm">{exercise.description}</p>
+                  <p className="text-gray-600 mb-4 text-sm">
+                    AI-recommended exercise based on your injury report analysis
+                  </p>
                   
                   <div className="grid grid-cols-3 gap-3 text-center text-sm">
                     <div className="bg-gray-50 rounded-lg p-2">
@@ -383,8 +394,17 @@ export default function PatientDashboard() {
                     </div>
                     <div className="bg-gray-50 rounded-lg p-2">
                       <p className="text-xs text-gray-500">Duration</p>
-                      <p className="font-bold text-gray-900">{exercise.duration}</p>
+                      <p className="font-bold text-gray-900">{exercise.duration}s</p>
                     </div>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <Link 
+                      href={`/patient/exercises/${exercise.name.toLowerCase().replace(/\s+/g, '-')}`}
+                      className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 text-center block"
+                    >
+                      Start Exercise
+                    </Link>
                   </div>
                 </motion.div>
               ))}

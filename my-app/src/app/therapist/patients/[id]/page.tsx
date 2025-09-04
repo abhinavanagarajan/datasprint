@@ -5,13 +5,18 @@ import { useParams } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import Charts from '@/components/Charts'
 import { motion } from 'framer-motion'
-import { Calendar, Target, TrendingUp, BarChart3 } from 'lucide-react'
+import { useUser } from '@clerk/nextjs'
+import { Calendar, Target, TrendingUp, BarChart3, User } from 'lucide-react'
 
 export default function TherapistPatientDetail() {
   const params = useParams()
   const { patients } = useStore()
+  const { user } = useUser()
   
   const patient = patients.find(p => p.id === params.id)
+  
+  // Get therapist's first name or fallback to "Doctor"
+  const therapistName = user?.firstName || user?.username || "Doctor"
   
   if (!patient) {
     return (
@@ -37,6 +42,12 @@ export default function TherapistPatientDetail() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <User className="h-5 w-5 text-blue-600" />
+          </div>
+          <span className="text-sm text-gray-500">Dr. {therapistName} reviewing patient:</span>
+        </div>
         <h1 className="text-3xl font-bold text-gray-100">{patient.name}</h1>
         <p className="text-gray-200">{patient.email}</p>
       </motion.div>

@@ -4,10 +4,15 @@
 import { useStore } from '@/lib/store'
 import Charts from '@/components/Charts'
 import { motion } from 'framer-motion'
+import { useUser } from '@clerk/nextjs'
 import { TrendingUp, Target, Calendar, BarChart3, Award, Zap } from 'lucide-react'
 
 export default function PatientProgress() {
   const { progress, exercises } = useStore()
+  const { user } = useUser()
+  
+  // Get user's first name or fallback to "Patient"
+  const userName = user?.firstName || user?.username || "Patient"
   
   const totalCompleted = progress.reduce((sum, p) => sum + p.completed, 0)
   const totalTime = progress.reduce((sum, p) => sum + p.timeSpent, 0)
@@ -28,10 +33,10 @@ export default function PatientProgress() {
             <Award className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-3">
-            Your Progress Journey
+            {userName}'s Progress Journey
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Track your rehabilitation milestones and celebrate your achievements
+            Track your rehabilitation milestones and celebrate your achievements, {userName}
           </p>
         </motion.div>
         

@@ -4,10 +4,15 @@
 import { useStore } from '@/lib/store'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { useUser } from '@clerk/nextjs'
 import { Users, Activity, AlertCircle, TrendingUp } from 'lucide-react'
 
 export default function TherapistDashboard() {
   const { patients } = useStore()
+  const { user } = useUser()
+  
+  // Get therapist's first name or fallback to "Doctor"
+  const therapistName = user?.firstName || user?.username || "Doctor"
   
   // Find patients who haven't completed any exercises in the last 2 days
   const nonAdherentPatients = patients.filter(patient => {
@@ -21,10 +26,18 @@ export default function TherapistDashboard() {
       <motion.h1 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-3xl font-bold text-gray-100 mb-8"
+        className="text-3xl font-bold text-gray-100 mb-2"
       >
-        Therapist Dashboard
+        Dr. {therapistName}'s Dashboard
       </motion.h1>
+      <motion.p 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="text-gray-300 mb-8"
+      >
+        Welcome back, Dr. {therapistName}. Here's an overview of your patients' progress.
+      </motion.p>
       
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">

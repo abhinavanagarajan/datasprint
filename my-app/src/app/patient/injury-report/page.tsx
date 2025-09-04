@@ -9,10 +9,9 @@ import InjuryReportUpload from '@/components/InjuryReportUpload'
 interface RecommendedExercise {
   name: string
   sets: number
-  reps: string
-  duration: string
-  description: string
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced'
+  reps: number
+  duration: number
+  confidence: number
 }
 
 export default function InjuryReportPage() {
@@ -26,48 +25,45 @@ export default function InjuryReportPage() {
     setUploadedFile(file)
     setIsAnalyzing(true)
     
-    // Simulate AI analysis of the injury report
-    setTimeout(() => {
-      // Mock recommendations based on common injury types
-      const mockRecommendations: RecommendedExercise[] = [
-        {
-          name: "Gentle Range of Motion",
-          sets: 3,
-          reps: "10-15 reps",
-          duration: "2 weeks",
-          description: "Gentle movements to restore mobility and prevent stiffness",
-          difficulty: "Beginner"
-        },
-        {
-          name: "Strengthening Exercises",
-          sets: 2,
-          reps: "8-12 reps",
-          duration: "4 weeks",
-          description: "Progressive resistance training to rebuild muscle strength",
-          difficulty: "Intermediate"
-        },
-        {
-          name: "Balance Training",
-          sets: 3,
-          reps: "30-60 seconds",
-          duration: "3 weeks",
-          description: "Stability exercises to improve proprioception and prevent re-injury",
-          difficulty: "Beginner"
-        },
-        {
-          name: "Functional Movement",
-          sets: 2,
-          reps: "10-15 reps",
-          duration: "6 weeks",
-          description: "Real-world movement patterns to return to daily activities",
-          difficulty: "Advanced"
-        }
-      ]
+    try {
+      // Create form data
+      const formData = new FormData()
+      formData.append('file', file)
       
-      setRecommendations(mockRecommendations)
+      // Call the backend API
+      const response = await fetch('http://127.0.0.1:8000/process_report', {
+        method: 'POST',
+        body: formData,
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to process report')
+      }
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        // Transform API response to match our interface
+        const transformedRecommendations: RecommendedExercise[] = data.result.recommended_exercises.map((exercise: any) => ({
+          name: exercise.name.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (l: string) => l.toUpperCase()),
+          sets: exercise.sets,
+          reps: exercise.reps,
+          duration: exercise.duration,
+          confidence: exercise.confidence
+        }))
+        
+        setRecommendations(transformedRecommendations)
+        setAnalysisComplete(true)
+      } else {
+        throw new Error('Analysis failed')
+      }
+    } catch (error) {
+      console.error('Error processing report:', error)
+      // You might want to show an error message to the user here
+      alert('Failed to process the report. Please try again.')
+    } finally {
       setIsAnalyzing(false)
-      setAnalysisComplete(true)
-    }, 3000) // 3 second simulation
+    }
   }
 
   const proceedToExercises = () => {
@@ -184,7 +180,7 @@ export default function InjuryReportPage() {
                     <p className="text-lg text-gray-600">Your personalized rehabilitation plan is ready</p>
                   </div>
                   <div className="p-4 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl">
-                    <Award className="w-8 w-8 text-emerald-600" />
+                    <Award className="w-8 h-8 text-emerald-600" />
                   </div>
                 </div>
               </div>
@@ -200,36 +196,22 @@ export default function InjuryReportPage() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
-                  <div className={`absolute inset-0 rounded-3xl blur-lg opacity-15 transition duration-300 group-hover:opacity-20 ${
-                    exercise.difficulty === 'Beginner' ? 'bg-gradient-to-r from-green-400 to-emerald-400' :
-                    exercise.difficulty === 'Intermediate' ? 'bg-gradient-to-r from-amber-400 to-orange-400' :
-                    'bg-gradient-to-r from-red-400 to-pink-400'
-                  }`}></div>
+                  <div className="absolute inset-0 rounded-3xl blur-lg opacity-15 transition duration-300 group-hover:opacity-20 bg-gradient-to-r from-blue-400 to-purple-400"></div>
                   <div className="relative bg-white/90 backdrop-blur-sm border border-white/60 rounded-3xl p-8 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                     <div className="flex items-start justify-between mb-6">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-3">
-                          <div className={`p-3 rounded-xl ${
-                            exercise.difficulty === 'Beginner' ? 'bg-gradient-to-br from-green-100 to-emerald-100' :
-                            exercise.difficulty === 'Intermediate' ? 'bg-gradient-to-br from-amber-100 to-orange-100' :
-                            'bg-gradient-to-br from-red-100 to-pink-100'
-                          }`}>
-                            <Target className={`w-6 h-6 ${
-                              exercise.difficulty === 'Beginner' ? 'text-green-600' :
-                              exercise.difficulty === 'Intermediate' ? 'text-amber-600' :
-                              'text-red-600'
-                            }`} />
+                          <div className="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100">
+                            <Target className="w-6 h-6 text-blue-600" />
                           </div>
                           <h3 className="text-2xl font-bold text-gray-800">{exercise.name}</h3>
                         </div>
-                        <p className="text-gray-600 text-lg leading-relaxed">{exercise.description}</p>
+                        <p className="text-gray-600 text-lg leading-relaxed">
+                          AI-recommended exercise with {(exercise.confidence * 100).toFixed(0)}% confidence
+                        </p>
                       </div>
-                      <div className={`px-4 py-2 rounded-full text-sm font-semibold border-2 ${
-                        exercise.difficulty === 'Beginner' ? 'bg-green-50 text-green-700 border-green-200' :
-                        exercise.difficulty === 'Intermediate' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                        'bg-red-50 text-red-700 border-red-200'
-                      }`}>
-                        {exercise.difficulty}
+                      <div className="px-4 py-2 rounded-full text-sm font-semibold border-2 bg-blue-50 text-blue-700 border-blue-200">
+                        {(exercise.confidence * 100).toFixed(0)}% Match
                       </div>
                     </div>
                     
@@ -256,10 +238,10 @@ export default function InjuryReportPage() {
                       
                       <div className="flex items-center space-x-4 p-5 bg-gradient-to-br from-gray-50 to-green-50/50 rounded-2xl border border-gray-100">
                         <div className="p-2 bg-green-100 rounded-lg">
-                          <Calendar className="w-5 h-5 text-green-600" />
+                          <Clock className="w-5 h-5 text-green-600" />
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500 font-medium">Duration</p>
+                          <p className="text-sm text-gray-500 font-medium">Duration (sec)</p>
                           <p className="text-xl font-bold text-gray-800">{exercise.duration}</p>
                         </div>
                       </div>

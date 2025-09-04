@@ -11,10 +11,9 @@ import { ArrowLeft, FileText, Brain, AlertCircle } from 'lucide-react'
 interface RecommendedExercise {
   name: string
   sets: number
-  reps: string
-  duration: string
-  description: string
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced'
+  reps: number
+  duration: number
+  confidence: number
 }
 
 export default function PatientExercises() {
@@ -171,16 +170,12 @@ export default function PatientExercises() {
                 >
                   <div className="flex items-start justify-between mb-4">
                     <h3 className="text-xl font-bold text-cyan-300">{exercise.name}</h3>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      exercise.difficulty === 'Beginner' ? 'bg-green-500/20 text-green-300' :
-                      exercise.difficulty === 'Intermediate' ? 'bg-yellow-500/20 text-yellow-300' :
-                      'bg-red-500/20 text-red-300'
-                    }`}>
-                      {exercise.difficulty}
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300">
+                      {(exercise.confidence * 100).toFixed(0)}% Match
                     </span>
                   </div>
                   
-                  <p className="text-blue-200 mb-4 text-sm">{exercise.description}</p>
+                  <p className="text-blue-200 mb-4 text-sm">AI-recommended exercise based on your injury report</p>
                   
                   <div className="grid grid-cols-3 gap-3 text-center">
                     <div className="bg-slate-700/50 rounded-lg p-3">
@@ -193,12 +188,12 @@ export default function PatientExercises() {
                     </div>
                     <div className="bg-slate-700/50 rounded-lg p-3">
                       <p className="text-xs text-gray-400 mb-1">Duration</p>
-                      <p className="font-bold text-white">{exercise.duration}</p>
+                      <p className="font-bold text-white">{exercise.duration}s</p>
                     </div>
                   </div>
                   
                   <Link 
-                    href={`/patient/exercises/${index + 1}`}
+                    href={`/patient/exercises/${exercise.name.toLowerCase().replace(/\s+/g, '-')}`}
                     className="mt-4 w-full block text-center px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all duration-300"
                   >
                     Start Exercise
