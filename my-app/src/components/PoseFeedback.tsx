@@ -38,9 +38,9 @@ const PoseFeedback: React.FC<PoseFeedbackProps> = ({ success, score, is_correct,
             <div className="text-xs text-gray-500"></div>
             <div className="text-2xl font-bold text-blue-600">
               {is_correct === true
-                ? "Correct"
+                ? <CheckCircle className="h-6 w-6" />
                 : is_correct === false
-                ? "Incorrect"
+                ? <XCircle className="h-6 w-6" />
                 : ""}
             </div>
 
@@ -67,11 +67,13 @@ const PoseFeedback: React.FC<PoseFeedbackProps> = ({ success, score, is_correct,
             ) : (
               <AlertCircle className="h-6 w-6" />
             )}
+             <div className="flex flex-col space-y-1">
+              {feedback_messages.map((feedback, index) => (
+                <span key={index} className="font-medium">{feedback}<hr/></span>
+                
+              ))}
+            </div>
 
-            {feedback_messages.map((feedback, index) => (
-              <span key={index} className="font-medium">{feedback}</span>
-            ))}
-            
           </motion.div>
         )}
       </AnimatePresence>
