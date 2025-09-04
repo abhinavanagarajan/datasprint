@@ -193,63 +193,8 @@ export default function PatientDailyProgress() {
     stopCamera()
     setIsTimerActive(false)
   }
-    }
-  ]
 
-  // Get user's first name or fallback to "Patient"
-  const userName = user?.firstName || user?.username || "Patient"
-
-  // Format time helper
-  const formatTime = (seconds: number) => {
-    const hrs = Math.floor(seconds / 3600)
-    const mins = Math.floor((seconds % 3600) / 60)
-    const secs = seconds % 60
-    if (hrs > 0) return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
-  
-  const stats = [
-    {
-      icon: Target,
-      label: "Today's Exercises",
-      value: `${todayProgress?.completed || 0}/${dailyGoals[0].target}`,
-      color: 'from-emerald-500 to-green-600',
-      bgGlow: 'shadow-emerald-500/25',
-      delay: 0.1,
-      percentage: Math.round(((todayProgress?.completed || 0) / dailyGoals[0].target) * 100)
-    },
-    {
-      icon: Clock,
-      label: "Exercise Time",
-      value: formatTime(todayProgress?.timeSpent || 0),
-      color: 'from-blue-500 to-indigo-600',
-      bgGlow: 'shadow-blue-500/25',
-      delay: 0.2,
-      percentage: Math.round(((todayProgress?.timeSpent || 0) / 60 / dailyGoals[1].target) * 100)
-    },
-    {
-      icon: Zap,
-      label: 'Accuracy Score',
-      value: `${todayProgress?.accuracy || 0}%`,
-      color: 'from-amber-500 to-orange-600',
-      bgGlow: 'shadow-amber-500/25',
-      delay: 0.3,
-      percentage: todayProgress?.accuracy || 0
-    },
-    {
-      icon: Award,
-      label: 'Current Streak',
-      value: `${streak} days`,
-      color: 'from-purple-500 to-indigo-600',
-      bgGlow: 'shadow-purple-500/25',
-      delay: 0.4,
-      percentage: Math.min(streak * 10, 100)
-    }
-  ]
-
-  // If no injury report, show injury report upload prompt
-  if (!hasInjuryReport) {
-    return (
+  return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         {/* Animated Background */}
         <div className="absolute inset-0">
