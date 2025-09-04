@@ -4,13 +4,12 @@
 import { useStore } from '@/lib/store'
 import { usePostureAnalysis } from '@/hooks/usePostureAnalysis'
 import { motion } from 'framer-motion'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { 
-  TrendingUp, Target, Calendar, Award, Sparkles, ChevronRight, Camera, 
-  Clock, Activity, BarChart3, CheckCircle, Timer, Zap, Star, TrendingDown, Users, 
-  PlayCircle, PauseCircle, RotateCcw, Plus, Minus, Eye, Video, Wifi, WifiOff,
-  Volume2, VolumeX, Settings
+  Target, Calendar, Clock, Activity, BarChart3, CheckCircle, Timer, Zap,
+  PlayCircle, PauseCircle, RotateCcw, Camera, Video, Wifi, WifiOff,
+  Volume2, VolumeX
 } from 'lucide-react'
 
 interface DailyGoal {
@@ -21,7 +20,7 @@ interface DailyGoal {
 }
 
 export default function PatientDailyProgress() {
-  const { progress, streak } = useStore()
+  const { progress } = useStore()
   const { user } = useUser()
   const [selectedTimeframe, setSelectedTimeframe] = useState<'week' | 'month' | 'all'>('week')
   const [todayExerciseTime, setTodayExerciseTime] = useState(0)
@@ -34,17 +33,13 @@ export default function PatientDailyProgress() {
     sessionId,
     currentExercise,
     availableExercises,
-    lastResult,
     errors,
     isAnalyzing,
-    imageSrc,
-    landmarks,
     success,
     score,
     is_correct,
     exercise_name,
     feedback_messages,
-    audio_feedback,
     annotated_frame,
     individual_scores,
     videoRef,
@@ -195,150 +190,6 @@ export default function PatientDailyProgress() {
   }
 
   return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        {/* Animated Background */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-400/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-        </div>
-        
-        <div className="relative max-w-6xl mx-auto px-6 py-16">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-16"
-          >
-            <div className="inline-flex items-center bg-cyan-500/10 backdrop-blur-sm px-6 py-3 rounded-full border border-cyan-400/30 mb-6">
-              <Sparkles className="h-5 w-5 text-cyan-400 mr-2" />
-              <span className="text-sm font-medium text-cyan-300">Welcome back, {userName}!</span>
-            </div>
-            <h1 className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-400 mb-6">
-              🏥 PATIENT DASHBOARD
-            </h1>
-            <p className="text-xl text-blue-200 max-w-3xl mx-auto leading-relaxed">
-              Start your personalized rehabilitation journey with AI-powered exercise recommendations
-            </p>
-          </motion.div>
-
-          {/* Injury Report Upload Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="max-w-4xl mx-auto"
-          >
-            {/* Main Upload Card */}
-            <div className="bg-slate-800/50 backdrop-blur-xl border border-cyan-400/30 rounded-3xl p-12 mb-12">
-              <div className="text-center space-y-8">
-                {/* Icon */}
-                <div className="relative">
-                  <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-600/20 border-2 border-cyan-400/50 flex items-center justify-center">
-                    <FileText className="w-12 h-12 text-cyan-400" />
-                  </div>
-                  <div className="absolute inset-0 w-24 h-24 mx-auto rounded-full bg-cyan-400/20 animate-ping"></div>
-                </div>
-
-                {/* Content */}
-                <div className="space-y-4">
-                  <h2 className="text-3xl font-bold text-cyan-300">
-                    Upload Your Injury Report
-                  </h2>
-                  <p className="text-lg text-blue-200 max-w-2xl mx-auto">
-                    Get started by uploading your medical report or injury documentation. 
-                    Our AI will analyze your condition and create a personalized exercise program just for you.
-                  </p>
-                </div>
-
-                {/* Upload Button */}
-                <Link 
-                  href="/patient/injury-report"
-                  className="group inline-flex items-center space-x-4 px-10 py-5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xl rounded-full hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-cyan-500/25"
-                >
-                  <Upload className="w-6 h-6" />
-                  <span>Upload Injury Report</span>
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </div>
-            </div>
-
-            {/* Process Steps */}
-            <motion.div 
-              className="grid md:grid-cols-3 gap-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-            >
-              {[
-                {
-                  step: "1",
-                  icon: FileText,
-                  title: "Upload Report",
-                  description: "Upload your medical report, X-rays, or doctor's notes in PDF format"
-                },
-                {
-                  step: "2", 
-                  icon: Brain,
-                  title: "AI Analysis",
-                  description: "Our advanced AI analyzes your condition and determines the best exercises"
-                },
-                {
-                  step: "3",
-                  icon: Target,
-                  title: "Start Training",
-                  description: "Begin your personalized exercise program with sets, reps, and duration"
-                }
-              ].map((item, index) => (
-                <motion.div
-                  key={index}
-                  className="text-center space-y-4"
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 + (index * 0.2) }}
-                >
-                  <div className="relative">
-                    <div className="w-16 h-16 mx-auto rounded-full bg-slate-700/50 border-2 border-cyan-400/30 flex items-center justify-center">
-                      <item.icon className="w-8 h-8 text-cyan-400" />
-                    </div>
-                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-cyan-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                      {item.step}
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-bold text-cyan-300">{item.title}</h3>
-                  <p className="text-blue-200 text-sm leading-relaxed">{item.description}</p>
-                </motion.div>
-              ))}
-            </motion.div>
-
-            {/* Help Section */}
-            <motion.div 
-              className="mt-16 p-8 bg-slate-800/30 border border-slate-600/30 rounded-2xl"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.2 }}
-            >
-              <h3 className="text-xl font-bold text-cyan-300 mb-4 text-center">What documents can I upload?</h3>
-              <div className="grid md:grid-cols-2 gap-6 text-sm text-blue-200">
-                <div className="space-y-2">
-                  <p>✅ Medical reports and diagnoses</p>
-                  <p>✅ X-ray and MRI results</p>
-                  <p>✅ Doctor's notes and recommendations</p>
-                </div>
-                <div className="space-y-2">
-                  <p>✅ Physiotherapy assessments</p>
-                  <p>✅ Surgery reports and discharge notes</p>
-                  <p>✅ Any injury-related documentation</p>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
-      </div>
-    )
-  }
-  
-  // Dashboard for users who have uploaded injury report
-  return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-30">
@@ -362,7 +213,7 @@ export default function PatientDailyProgress() {
             {userName}'s Recovery Dashboard
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Track your daily progress and achieve your rehabilitation goals
+            Track your daily progress with real-time computer vision analysis
           </p>
         </motion.div>
 
@@ -427,7 +278,7 @@ export default function PatientDailyProgress() {
         >
           <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
             <Activity className="w-6 h-6 text-indigo-600 mr-2" />
-            Live Statistics
+            Live Computer Vision Statistics
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, index) => (
@@ -482,11 +333,192 @@ export default function PatientDailyProgress() {
           </div>
         </motion.div>
 
-        {/* Exercise Timer Section */}
+        {/* Computer Vision Exercise Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
+          className="mb-8"
+        >
+          <div className="bg-white/80 backdrop-blur-xl border border-white/20 p-8 rounded-2xl shadow-lg">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                <Camera className="w-6 h-6 text-indigo-600 mr-2" />
+                Real-Time Exercise Analysis
+              </h2>
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setAudioEnabled(!audioEnabled)}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-semibold transition-all duration-300 ${
+                    audioEnabled 
+                      ? 'bg-green-500 hover:bg-green-600 text-white' 
+                      : 'bg-gray-500 hover:bg-gray-600 text-white'
+                  }`}
+                >
+                  {audioEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                  <span>{audioEnabled ? 'Audio On' : 'Audio Off'}</span>
+                </button>
+                <button
+                  onClick={isAnalyzing ? handleStopExercise : handleStartExercise}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-semibold transition-all duration-300 ${
+                    isAnalyzing 
+                      ? 'bg-red-500 hover:bg-red-600 text-white' 
+                      : 'bg-green-500 hover:bg-green-600 text-white'
+                  }`}
+                >
+                  {isAnalyzing ? <PauseCircle className="w-4 h-4" /> : <PlayCircle className="w-4 h-4" />}
+                  <span>{isAnalyzing ? 'Stop Analysis' : 'Start Analysis'}</span>
+                </button>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Video Feed */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-800">Live Camera Feed</h3>
+                <div className="relative bg-gray-900 rounded-lg overflow-hidden">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-64 object-cover"
+                  />
+                  <canvas
+                    ref={canvasRef}
+                    className="hidden"
+                  />
+                  {annotated_frame && (
+                    <div className="absolute inset-0">
+                      <img 
+                        src={`data:image/jpeg;base64,${annotated_frame}`} 
+                        alt="Annotated pose"
+                        className="w-full h-64 object-cover"
+                      />
+                    </div>
+                  )}
+                  {!isAnalyzing && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                      <div className="text-center text-white">
+                        <Video className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">Click "Start Analysis" to begin</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Exercise Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-800">Exercise Information</h3>
+                <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Current Exercise</label>
+                    <p className="text-xl font-bold text-gray-900">{exercise_name || currentExercise || 'None Selected'}</p>
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Real-time Score</label>
+                    <div className="flex items-center space-x-3">
+                      <div className="flex-1 bg-gray-200 rounded-full h-3">
+                        <div 
+                          className="bg-blue-500 h-3 rounded-full transition-all duration-300"
+                          style={{ width: `${Math.round((score || 0) * 100)}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-xl font-bold text-gray-900">{Math.round((score || 0) * 100)}%</span>
+                    </div>
+                  </div>
+
+                  {feedback_messages && feedback_messages.length > 0 && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Live Feedback</label>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 max-h-32 overflow-y-auto">
+                        {feedback_messages.map((message, index) => (
+                          <p key={index} className="text-sm text-blue-800 mb-1">{message}</p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {individual_scores && Object.keys(individual_scores).length > 0 && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Individual Joint Scores</label>
+                      <div className="grid grid-cols-2 gap-2 mt-2">
+                        {Object.entries(individual_scores).map(([joint, score]) => (
+                          <div key={joint} className="bg-white rounded p-2 border">
+                            <p className="text-xs font-medium text-gray-600 capitalize">{joint}</p>
+                            <p className="text-sm font-bold text-gray-900">{Math.round((score as number) * 100)}%</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Exercise Selection */}
+            {availableExercises && availableExercises.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Available Exercises</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {availableExercises.map((exercise, index) => (
+                    <button
+                      key={index}
+                      onClick={() => changeExercise(exercise)}
+                      className={`p-3 rounded-lg text-sm font-medium transition-all duration-300 ${
+                        exercise === currentExercise
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {exercise}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Connection Status */}
+            <div className="mt-6 flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center space-x-3">
+                {isConnected ? (
+                  <Wifi className="w-5 h-5 text-green-500" />
+                ) : (
+                  <WifiOff className="w-5 h-5 text-red-500" />
+                )}
+                <span className={`font-medium ${isConnected ? 'text-green-700' : 'text-red-700'}`}>
+                  {isConnected ? 'Connected to Computer Vision Server' : 'Disconnected from Server'}
+                </span>
+              </div>
+              {sessionId && (
+                <span className="text-sm text-gray-500">Session: {String(sessionId).slice(0, 8)}...</span>
+              )}
+            </div>
+
+            {/* Error Display */}
+            {errors && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <p className="text-red-700">{errors}</p>
+                  <button
+                    onClick={clearError}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Exercise Timer Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
           className="mb-8"
         >
           <div className="bg-white/80 backdrop-blur-xl border border-white/20 p-8 rounded-2xl shadow-lg">
@@ -529,7 +561,7 @@ export default function PatientDailyProgress() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.6 }}
           className="mb-8"
         >
           <div className="bg-white/80 backdrop-blur-xl border border-white/20 p-8 rounded-2xl shadow-lg">
@@ -539,14 +571,14 @@ export default function PatientDailyProgress() {
                 Weekly Progress
               </h2>
               <div className="flex space-x-2">
-                {['week', 'month', 'all'].map((timeframe) => (
+                {(['week', 'month', 'all'] as const).map((timeframe) => (
                   <button
                     key={timeframe}
-                    onClick={() => setSelectedTimeframe(timeframe as any)}
-                    className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                    onClick={() => setSelectedTimeframe(timeframe)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                       selectedTimeframe === timeframe
                         ? 'bg-indigo-500 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
                     {timeframe.charAt(0).toUpperCase() + timeframe.slice(1)}
@@ -554,214 +586,27 @@ export default function PatientDailyProgress() {
                 ))}
               </div>
             </div>
-            <div className="grid grid-cols-7 gap-4">
-              {weeklyProgress.map((day, index) => {
-                const isToday = day.date === today
-                const dayName = new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })
-                const maxHeight = 100
-                const height = Math.max((day.completed / 5) * maxHeight, 8)
-                
-                return (
-                  <div key={day.date} className="text-center">
-                    <div className="mb-2">
+            
+            <div className="grid grid-cols-7 gap-4 mb-4">
+              {weeklyProgress.map((day, index) => (
+                <div key={day.date} className="text-center">
+                  <div className="text-xs font-medium text-gray-500 mb-2">
+                    {new Date(day.date).toLocaleDateString('en', { weekday: 'short' })}
+                  </div>
+                  <div className="bg-gray-100 rounded-lg p-3 space-y-2">
+                    <div className="text-xs text-gray-600">Accuracy</div>
+                    <div className="text-lg font-bold text-gray-900">{day.accuracy}%</div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
-                        className={`mx-auto rounded-lg transition-all duration-300 ${
-                          isToday ? 'bg-indigo-500' : 'bg-blue-400'
-                        } ${day.completed > 0 ? 'hover:scale-110' : ''}`}
-                        style={{ 
-                          height: `${height}px`, 
-                          width: '24px',
-                          minHeight: '8px'
-                        }}
+                        className="bg-blue-500 h-2 rounded-full"
+                        style={{ width: `${day.accuracy}%` }}
                       ></div>
                     </div>
-                    <p className={`text-xs font-semibold ${isToday ? 'text-indigo-600' : 'text-gray-600'}`}>
-                      {dayName}
-                    </p>
-                    <p className="text-xs text-gray-500">{day.completed}</p>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="mb-12"
-        >
-          <div className="grid md:grid-cols-3 gap-6">
-            <Link href="/patient/exercises" className="group">
-              <div className="bg-white/80 backdrop-blur-xl border border-white/20 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
-                <div className="flex items-center space-x-4">
-                  <div className="p-3 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl">
-                    <Target className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900">Start Exercises</h3>
-                    <p className="text-gray-600 text-sm">Begin your AI-recommended workout</p>
                   </div>
                 </div>
-              </div>
-            </Link>
-
-            <Link href="/patient/progress" className="group">
-              <div className="bg-white/80 backdrop-blur-xl border border-white/20 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
-                <div className="flex items-center space-x-4">
-                  <div className="p-3 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl">
-                    <TrendingUp className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900">View Progress</h3>
-                    <p className="text-gray-600 text-sm">Track your recovery journey</p>
-                  </div>
-                </div>
-              </div>
-            </Link>
-
-            <Link href="/patient/injury-report" className="group">
-              <div className="bg-white/80 backdrop-blur-xl border border-white/20 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
-                <div className="flex items-center space-x-4">
-                  <div className="p-3 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl">
-                    <FileText className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900">Update Report</h3>
-                    <p className="text-gray-600 text-sm">Modify your injury information</p>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          </div>
-        </motion.div>
-        
-        {/* AI Recommendations Preview */}
-        {recommendations.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="mb-12"
-          >
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2 flex items-center">
-                  <Brain className="w-8 h-8 text-indigo-600 mr-3" />
-                  AI Recommended Exercises
-                </h2>
-                <p className="text-gray-600">Top 3 exercises personalized based on your injury report</p>
-              </div>
-              <Link 
-                href="/patient/exercises"
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-full font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 flex items-center space-x-2"
-              >
-                <span>View All</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {recommendations.map((exercise, index) => (
-                <motion.div
-                  key={index}
-                  className="bg-white/80 backdrop-blur-xl border border-white/20 p-6 rounded-2xl shadow-lg"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.7 + (index * 0.1) }}
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <h3 className="text-lg font-bold text-gray-900">{exercise.name}</h3>
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
-                      {(exercise.confidence * 100).toFixed(0)}% Match
-                    </span>
-                  </div>
-                  
-                  <p className="text-gray-600 mb-4 text-sm">
-                    AI-recommended exercise based on your injury report analysis
-                  </p>
-                  
-                  <div className="grid grid-cols-3 gap-3 text-center text-sm">
-                    <div className="bg-gray-50 rounded-lg p-2">
-                      <p className="text-xs text-gray-500">Sets</p>
-                      <p className="font-bold text-gray-900">{exercise.sets}</p>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-2">
-                      <p className="text-xs text-gray-500">Reps</p>
-                      <p className="font-bold text-gray-900">{exercise.reps}</p>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-2">
-                      <p className="text-xs text-gray-500">Duration</p>
-                      <p className="font-bold text-gray-900">{exercise.duration}s</p>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4">
-                    <Link 
-                      href={`/patient/exercises/${exercise.name.toLowerCase().replace(/\s+/g, '-')}`}
-                      className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 text-center block"
-                    >
-                      Start Exercise
-                    </Link>
-                  </div>
-                </motion.div>
               ))}
             </div>
-          </motion.div>
-        )}
-        
-        {/* Exercises Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, type: "spring", stiffness: 100 }}
-          className="mb-12"
-        >
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Therapist Assigned Exercises</h2>
-              <p className="text-gray-600">Additional exercises from your healthcare provider</p>
-            </div>
           </div>
-          
-          {exercises.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-              {exercises.map((exercise, index) => (
-                <motion.div
-                  key={exercise.id}
-                  initial={{ opacity: 0, y: 40, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ 
-                    delay: 0.9 + (index * 0.1),
-                    type: "spring",
-                    stiffness: 100,
-                    damping: 20
-                  }}
-                >
-                  <ExerciseCard exercise={exercise} />
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.9, type: "spring", stiffness: 100 }}
-              className="bg-white/60 backdrop-blur-md border border-white/30 rounded-3xl p-12 text-center"
-            >
-              <div className="max-w-md mx-auto">
-                <div className="inline-flex p-6 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 mb-6">
-                  <Target className="h-12 w-12 text-indigo-600" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">No Therapist Exercises Yet</h3>
-                <p className="text-gray-600 text-lg leading-relaxed">
-                  Your therapist hasn't assigned any additional exercises. Focus on your AI-recommended program for now!
-                </p>
-              </div>
-            </motion.div>
-          )}
         </motion.div>
       </div>
     </div>
