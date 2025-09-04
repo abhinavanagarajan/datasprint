@@ -1,6 +1,7 @@
 "use client"
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs'
 
 export default function Home() {
   return (
@@ -109,37 +110,69 @@ export default function Home() {
             transition={{ duration: 1, delay: 0.8 }}
             className="flex flex-col sm:flex-row gap-8 justify-center items-center"
           >
-            <Link 
-              href="/patient/dashboard" 
-              className="group relative px-12 py-6 rounded-full font-bold text-xl transition-all duration-500 overflow-hidden portal-button"
-            >
-              {/* Rotating border effect */}
-              <div className="absolute inset-0 rounded-full bg-gradient-conic from-cyan-400 via-blue-500 to-purple-500 animate-spin-slow"></div>
-              <div className="absolute inset-1 rounded-full bg-black"></div>
-              
-              <div className="relative text-white group-hover:text-cyan-300 transition-colors duration-300 z-10">
-                🎮 PATIENT PORTAL
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="group relative px-12 py-6 rounded-full font-bold text-xl transition-all duration-500 overflow-hidden portal-button">
+                  {/* Rotating border effect */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-conic from-cyan-400 via-blue-500 to-purple-500 animate-spin-slow"></div>
+                  <div className="absolute inset-1 rounded-full bg-black"></div>
+                  
+                  <div className="relative text-white group-hover:text-cyan-300 transition-colors duration-300 z-10">
+                    🔐 ENTER PORTAL
+                  </div>
+                  
+                  {/* Glowing effect */}
+                  <div className="absolute inset-0 rounded-full bg-cyan-400/20 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500"></div>
+                </button>
+              </SignInButton>
+            </SignedOut>
+
+            <SignedIn>
+              <div className="flex gap-6 items-center">
+                <Link 
+                  href="/patient/dashboard" 
+                  className="group relative px-12 py-6 rounded-full font-bold text-xl transition-all duration-500 overflow-hidden portal-button"
+                >
+                  {/* Rotating border effect */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-conic from-cyan-400 via-blue-500 to-purple-500 animate-spin-slow"></div>
+                  <div className="absolute inset-1 rounded-full bg-black"></div>
+                  
+                  <div className="relative text-white group-hover:text-cyan-300 transition-colors duration-300 z-10">
+                    🎮 PATIENT PORTAL
+                  </div>
+                  
+                  {/* Glowing effect */}
+                  <div className="absolute inset-0 rounded-full bg-cyan-400/20 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500"></div>
+                </Link>
+                
+                <Link 
+                  href="/therapist/dashboard" 
+                  className="group relative px-12 py-6 rounded-full font-bold text-xl transition-all duration-500 overflow-hidden portal-button"
+                >
+                  {/* Rotating border effect */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-conic from-emerald-400 via-green-500 to-blue-500 animate-spin-slow"></div>
+                  <div className="absolute inset-1 rounded-full bg-black"></div>
+                  
+                  <div className="relative text-white group-hover:text-emerald-300 transition-colors duration-300 z-10">
+                    👩‍⚕️ THERAPIST PORTAL
+                  </div>
+                  
+                  {/* Glowing effect */}
+                  <div className="absolute inset-0 rounded-full bg-emerald-400/20 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500"></div>
+                </Link>
+
+                <div className="relative">
+                  <UserButton 
+                    appearance={{
+                      elements: {
+                        avatarBox: "w-16 h-16 rounded-full border-2 border-cyan-400 hover:border-cyan-300 transition-all duration-300",
+                        userButtonPopoverCard: "bg-slate-800 border border-cyan-400/30"
+                      }
+                    }}
+                  />
+                </div>
               </div>
-              
-              {/* Glowing effect */}
-              <div className="absolute inset-0 rounded-full bg-cyan-400/20 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500"></div>
-            </Link>
-            
-            <Link 
-              href="/therapist/dashboard" 
-              className="group relative px-12 py-6 rounded-full font-bold text-xl transition-all duration-500 overflow-hidden portal-button"
-            >
-              {/* Rotating border effect */}
-              <div className="absolute inset-0 rounded-full bg-gradient-conic from-emerald-400 via-green-500 to-blue-500 animate-spin-slow"></div>
-              <div className="absolute inset-1 rounded-full bg-black"></div>
-              
-              <div className="relative text-white group-hover:text-emerald-300 transition-colors duration-300 z-10">
-                👩‍⚕️ THERAPIST PORTAL
-              </div>
-              
-              {/* Glowing effect */}
-              <div className="absolute inset-0 rounded-full bg-emerald-400/20 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500"></div>
-            </Link>
+            </SignedIn>
           </motion.div>
         </div>
 
@@ -179,11 +212,11 @@ export default function Home() {
                 scale: 1.05,
                 rotateY: 10,
                 z: 50,
+                transition: { duration: 0.4 }
               }}
               transition={{ 
                 duration: 1, 
-                delay: i * 0.3,
-                hover: { duration: 0.4 }
+                delay: i * 0.3
               }}
               className="group relative transform-3d"
             >

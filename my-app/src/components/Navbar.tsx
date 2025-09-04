@@ -4,6 +4,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs'
 
 const Navbar = () => {
   const pathname = usePathname()
@@ -17,38 +18,56 @@ const Navbar = () => {
         RehabGamify
       </Link>
       
-      <div className="flex space-x-6">
-        {isPatientRoute ? (
-          <>
-            <NavLink href="/patient/dashboard" pathname={pathname}>
-              Dashboard
-            </NavLink>
-            <NavLink href="/patient/exercises" pathname={pathname}>
-              Exercises
-            </NavLink>
-            <NavLink href="/patient/progress" pathname={pathname}>
-              Progress
-            </NavLink>
-          </>
-        ) : isTherapistRoute ? (
-          <>
-            <NavLink href="/therapist/dashboard" pathname={pathname}>
-              Dashboard
-            </NavLink>
-            <NavLink href="/therapist/assign" pathname={pathname}>
-              Assign Exercises
-            </NavLink>
-          </>
-        ) : (
-          <div className="flex space-x-4">
-            <Link href="/patient/dashboard" className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg">
-              Patient Login
-            </Link>
-            <Link href="/therapist/dashboard" className="px-4 py-2 bg-green-100 text-green-700 rounded-lg">
-              Therapist Login
-            </Link>
-          </div>
-        )}
+      <div className="flex space-x-6 items-center">
+        <SignedOut>
+          <SignInButton mode="modal">
+            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              Sign In
+            </button>
+          </SignInButton>
+        </SignedOut>
+
+        <SignedIn>
+          {isPatientRoute ? (
+            <>
+              <NavLink href="/patient/dashboard" pathname={pathname}>
+                Dashboard
+              </NavLink>
+              <NavLink href="/patient/exercises" pathname={pathname}>
+                Exercises
+              </NavLink>
+              <NavLink href="/patient/progress" pathname={pathname}>
+                Progress
+              </NavLink>
+            </>
+          ) : isTherapistRoute ? (
+            <>
+              <NavLink href="/therapist/dashboard" pathname={pathname}>
+                Dashboard
+              </NavLink>
+              <NavLink href="/therapist/assign" pathname={pathname}>
+                Assign Exercises
+              </NavLink>
+            </>
+          ) : (
+            <div className="flex space-x-4">
+              <Link href="/patient/dashboard" className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors">
+                Patient Portal
+              </Link>
+              <Link href="/therapist/dashboard" className="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors">
+                Therapist Portal
+              </Link>
+            </div>
+          )}
+          
+          <UserButton 
+            appearance={{
+              elements: {
+                avatarBox: "w-10 h-10 rounded-full border-2 border-blue-400 hover:border-blue-300 transition-all duration-300"
+              }
+            }}
+          />
+        </SignedIn>
       </div>
     </nav>
   )
