@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import json
@@ -8,6 +8,9 @@ from typing import Dict, List, Optional
 import logging
 from contextlib import asynccontextmanager
 from posture_checker import PhysiotherapyPostureChecker
+from report_reader.report_parser import MedicalExerciseRecommendationSystem
+from pypdf import PdfReader
+import io
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -416,6 +419,61 @@ async def broadcast_message(message: str):
         "message": f"Broadcast sent to {len(active_connections)} sessions",
         "disconnected_sessions": disconnected_sessions
     }
+
+@app.post("/process_report")
+async def process_report(file: UploadFile = File(...)):
+    # Read PDF into memory
+    pdf_bytes = await file.read()
+    reader = PdfReader(io.BytesIO(pdf_bytes))
+    report_text = " ".join([page.extract_text() for page in reader.pages if page.extract_text()])
+
+    recommender = MedicalExerciseRecommendationSystem()
+    recommender.load_available_exercises("exercises.txt")
+        
+    # Train models
+    recommender.train_models()
+    
+    # Extract medical features
+    medical_features = recommender.extract_medical_features(report_text)
+    
+    # Get recommendations
+    recommendations = recommender.predict_exercise_recommendations(medical_features)
+    revised_recommendations = []
+    for name, details in recommendations.items():
+        revised_recommendations.append({
+            "name": name,
+            "sets": details["parameters"]["sets"], 
+            "reps": details["parameters"]["reps_per_set"],
+            "duration": details["parameters"]["duration_seconds"],
+            "confidence": details["recommendation_confidence"]
+        })
+
+    # Sort by confidence (descending)
+    revised_recommendations.sort(key=lambda x: x["confidence"], reverse=True)
+
+    # Pick top 3
+    top3_recommendations = revised_recommendations[:3]
+
+    
+    # Create final result
+    result = {
+        # 'patient_summary': {
+        #     'age': medical_features.get('age', 'Unknown'),
+        #     'severity_level': medical_features.get('severity', 'Unknown'),
+        #     'functional_level': medical_features.get('functional_level', 'Unknown'),
+        #     'identified_conditions': list(medical_features.get('condition_scores', {}).keys()),
+        #     'limitations': medical_features.get('limitations', [])
+        # },
+        # 'medical_analysis': {
+        #     'text_length': medical_features.get('medical_text_length', 0),
+        #     'keywords_found': medical_features.get('medical_keywords_count', 0),
+        #     'primary_conditions': medical_features.get('condition_scores', {})
+        # },
+        'available_exercises_count': len(recommender.available_exercises),
+        'recommended_exercises': top3_recommendations,
+        'total_recommendations': len(recommendations)
+    }
+    return {"success": True, "result": result}
 
 if __name__ == "__main__":
     import uvicorn
