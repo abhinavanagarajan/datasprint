@@ -3,13 +3,14 @@
 
 import { useStore } from '@/lib/store'
 import { usePostureAnalysis } from '@/hooks/usePostureAnalysis'
+import { useDatabase } from '@/hooks/useDatabase'
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { 
   Target, Calendar, Clock, Activity, BarChart3, CheckCircle, Timer, Zap,
   PlayCircle, PauseCircle, RotateCcw, Camera, Video, Wifi, WifiOff,
-  Volume2, VolumeX
+  Volume2, VolumeX, User, BookOpen, Star, TrendingUp
 } from 'lucide-react'
 
 interface DailyGoal {
@@ -19,6 +20,32 @@ interface DailyGoal {
   unit: string
 }
 
+interface ExerciseAssignment {
+  id: string
+  therapistId: string
+  patientId: string
+  exerciseId: string
+  assignedDate: string
+  dueDate?: string
+  targetReps?: number
+  targetSets?: number
+  targetDuration?: number
+  notes?: string
+  status: 'assigned' | 'in_progress' | 'completed' | 'skipped'
+  exercise?: {
+    id: string
+    name: string
+    description: string
+    instructions: string[]
+    targetBodyParts: string[]
+    difficulty: 'beginner' | 'intermediate' | 'advanced'
+    duration: number
+    imageUrl?: string
+  }
+  createdAt: string
+  updatedAt: string
+}
+
 export default function PatientDailyProgress() {
   const { progress } = useStore()
   const { user } = useUser()
@@ -26,6 +53,22 @@ export default function PatientDailyProgress() {
   const [todayExerciseTime, setTodayExerciseTime] = useState(0)
   const [isTimerActive, setIsTimerActive] = useState(false)
   const [audioEnabled, setAudioEnabled] = useState(true)
+  const [currentPatient, setCurrentPatient] = useState<any>(null)
+  const [assignedExercises, setAssignedExercises] = useState<ExerciseAssignment[]>([])
+  const [selectedAssignment, setSelectedAssignment] = useState<ExerciseAssignment | null>(null)
+  const [dailyProgress, setDailyProgress] = useState<any>(null)
+  
+  // Database hook
+  const {
+    loading: dbLoading,
+    error: dbError,
+    getPatient,
+    getPatientAssignments,
+    getPatientProgress,
+    saveProgress,
+    updateAssignmentStatus,
+    clearError: clearDbError
+  } = useDatabase()
   
   // Computer Vision Integration
   const {
@@ -55,6 +98,35 @@ export default function PatientDailyProgress() {
   } = usePostureAnalysis()
 
   const userName = user?.firstName || 'Patient'
+
+  // Initialize patient data and assignments
+  useEffect(() => {
+    const initializePatientData = async () => {
+      if (!user?.id) return
+      
+      try {
+        // Get current patient profile
+        const patient = await getPatient()
+        if (patient) {
+          setCurrentPatient(patient)
+          
+          // Get assigned exercises
+          const assignments = await getPatientAssignments(patient.id)
+          setAssignedExercises(assignments)
+          
+          // Get progress data
+          const progressData = await getPatientProgress(patient.id, 30)
+          if (progressData) {
+            setDailyProgress(progressData)
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing patient data:', error)
+      }
+    }
+
+    initializePatientData()
+  }, [user?.id, getPatient, getPatientAssignments, getPatientProgress])
 
   useEffect(() => {
     // Timer for daily exercise tracking
@@ -108,12 +180,21 @@ export default function PatientDailyProgress() {
     return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
-  // Daily goals using computer vision data
+  // Daily goals using computer vision data and database assignments
+  const completedExercisesToday = assignedExercises.filter(assignment => 
+    assignment.status === 'completed' && 
+    new Date(assignment.updatedAt).toDateString() === new Date().toDateString()
+  ).length
+
+  const totalAssignedExercises = assignedExercises.filter(assignment => 
+    assignment.status !== 'skipped'
+  ).length
+
   const dailyGoals: DailyGoal[] = [
     {
       type: 'exercises',
-      target: 5,
-      current: success ? 1 : 0, // Number of successful exercises completed
+      target: Math.max(totalAssignedExercises, 3), // At least 3 exercises or number of assigned exercises
+      current: completedExercisesToday + (success ? 1 : 0),
       unit: 'exercises'
     },
     {
@@ -125,7 +206,7 @@ export default function PatientDailyProgress() {
     {
       type: 'accuracy',
       target: 85,
-      current: Math.round((score || 0) * 100),
+      current: Math.round((score || dailyProgress?.analytics?.averageAccuracy || 0) * (dailyProgress?.analytics?.averageAccuracy ? 1 : 100)),
       unit: '%'
     }
   ]
@@ -178,6 +259,20 @@ export default function PatientDailyProgress() {
       await startCamera()
       startAnalysis()
       setIsTimerActive(true)
+      
+      // Mark assignment as in progress if one is selected
+      if (selectedAssignment && selectedAssignment.status === 'assigned') {
+        await updateAssignmentStatus(selectedAssignment.id, 'in_progress')
+        
+        // Update local state
+        setAssignedExercises(prev => 
+          prev.map(assignment => 
+            assignment.id === selectedAssignment.id 
+              ? { ...assignment, status: 'in_progress' as const }
+              : assignment
+          )
+        )
+      }
     } catch (error) {
       console.error('Failed to start exercise:', error)
     }
@@ -187,6 +282,52 @@ export default function PatientDailyProgress() {
     stopAnalysis()
     stopCamera()
     setIsTimerActive(false)
+  }
+
+  const handleCompleteExercise = async () => {
+    if (!currentPatient) return
+
+    try {
+      // Save progress to database
+      const progressData = await saveProgress({
+        patientId: currentPatient.id,
+        exerciseAssignmentId: selectedAssignment?.id,
+        exerciseName: exercise_name || selectedAssignment?.exercise?.name || 'Manual Exercise',
+        duration: todayExerciseTime,
+        accuracy: Math.round((score || 0) * 100),
+        score: score || 0,
+        feedback: feedback_messages || [],
+        videoAnalysisData: {
+          individual_scores: individual_scores || {},
+          pose_landmarks: [],
+          exercise_specific_feedback: feedback_messages || []
+        }
+      })
+
+      if (progressData && selectedAssignment) {
+        // Mark assignment as completed
+        await updateAssignmentStatus(selectedAssignment.id, 'completed')
+        
+        // Update local state
+        setAssignedExercises(prev => 
+          prev.map(assignment => 
+            assignment.id === selectedAssignment.id 
+              ? { ...assignment, status: 'completed' as const }
+              : assignment
+          )
+        )
+        
+        // Reset timer and stop exercise
+        handleStopExercise()
+        setTodayExerciseTime(0)
+        setSelectedAssignment(null)
+        
+        // Show success message
+        alert(`Exercise completed! Score: ${Math.round((score || 0) * 100)}%`)
+      }
+    } catch (error) {
+      console.error('Failed to complete exercise:', error)
+    }
   }
 
   return (
@@ -215,6 +356,117 @@ export default function PatientDailyProgress() {
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Track your daily progress with real-time computer vision analysis
           </p>
+        </motion.div>
+
+        {/* Assigned Exercises Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-8"
+        >
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+            <BookOpen className="w-6 h-6 text-indigo-600 mr-2" />
+            Exercises Assigned by Your Therapist
+          </h2>
+          
+          {assignedExercises.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {assignedExercises.map((assignment) => (
+                <motion.div
+                  key={assignment.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3 }}
+                  whileHover={{ y: -4 }}
+                  className={`bg-white/80 backdrop-blur-xl border border-white/20 p-6 rounded-2xl shadow-lg cursor-pointer transition-all duration-300 ${
+                    selectedAssignment?.id === assignment.id 
+                      ? 'ring-2 ring-indigo-500 bg-indigo-50/80' 
+                      : 'hover:shadow-xl'
+                  }`}
+                  onClick={() => setSelectedAssignment(assignment)}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <Activity className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-gray-900">{assignment.exercise?.name}</h3>
+                        <p className="text-sm text-gray-600 capitalize">{assignment.exercise?.difficulty}</p>
+                      </div>
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      assignment.status === 'completed' 
+                        ? 'bg-green-100 text-green-700' 
+                        : assignment.status === 'in_progress'
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-yellow-100 text-yellow-700'
+                    }`}>
+                      {assignment.status.replace('_', ' ')}
+                    </span>
+                  </div>
+                  
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                    {assignment.exercise?.description}
+                  </p>
+                  
+                  <div className="space-y-2">
+                    {assignment.targetDuration && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Target Duration:</span>
+                        <span className="font-semibold">{assignment.targetDuration} min</span>
+                      </div>
+                    )}
+                    {assignment.targetReps && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Target Reps:</span>
+                        <span className="font-semibold">{assignment.targetReps}</span>
+                      </div>
+                    )}
+                    {assignment.dueDate && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Due Date:</span>
+                        <span className="font-semibold">
+                          {new Date(assignment.dueDate).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {assignment.notes && (
+                    <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-600">
+                        <strong>Therapist Notes:</strong> {assignment.notes}
+                      </p>
+                    </div>
+                  )}
+                  
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {assignment.exercise?.targetBodyParts.map((part, index) => (
+                      <span 
+                        key={index}
+                        className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full"
+                      >
+                        {part}
+                      </span>
+                    ))}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white/80 backdrop-blur-xl border border-white/20 rounded-2xl">
+              <User className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Exercises Assigned Yet</h3>
+              <p className="text-gray-600 mb-4">
+                Your therapist hasn't assigned any exercises yet. Contact them to get started with your rehabilitation program.
+              </p>
+              <div className="text-sm text-gray-500">
+                You can still use the computer vision system below for free-form exercises.
+              </div>
+            </div>
+          )}
         </motion.div>
 
         {/* Daily Goals Section */}
@@ -369,6 +621,15 @@ export default function PatientDailyProgress() {
                   {isAnalyzing ? <PauseCircle className="w-4 h-4" /> : <PlayCircle className="w-4 h-4" />}
                   <span>{isAnalyzing ? 'Stop Analysis' : 'Start Analysis'}</span>
                 </button>
+                {isAnalyzing && selectedAssignment && (
+                  <button
+                    onClick={handleCompleteExercise}
+                    className="flex items-center space-x-2 px-4 py-2 rounded-lg font-semibold bg-blue-500 hover:bg-blue-600 text-white transition-all duration-300"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Complete Exercise</span>
+                  </button>
+                )}
               </div>
             </div>
             
@@ -412,10 +673,52 @@ export default function PatientDailyProgress() {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-800">Exercise Information</h3>
                 <div className="bg-gray-50 rounded-lg p-6 space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Current Exercise</label>
-                    <p className="text-xl font-bold text-gray-900">{exercise_name || currentExercise || 'None Selected'}</p>
-                  </div>
+                  {selectedAssignment ? (
+                    <>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Assigned Exercise</label>
+                        <p className="text-xl font-bold text-gray-900">{selectedAssignment.exercise?.name}</p>
+                        <p className="text-sm text-gray-600">{selectedAssignment.exercise?.description}</p>
+                      </div>
+                      
+                      {selectedAssignment.exercise?.instructions && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Instructions</label>
+                          <ul className="mt-2 space-y-1">
+                            {selectedAssignment.exercise.instructions.map((instruction, index) => (
+                              <li key={index} className="text-sm text-gray-700 flex items-start">
+                                <span className="bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center mr-2 mt-0.5">
+                                  {index + 1}
+                                </span>
+                                {instruction}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        {selectedAssignment.targetDuration && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-600">Target Duration</label>
+                            <p className="text-lg font-bold text-gray-900">{selectedAssignment.targetDuration} min</p>
+                          </div>
+                        )}
+                        {selectedAssignment.targetReps && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-600">Target Reps</label>
+                            <p className="text-lg font-bold text-gray-900">{selectedAssignment.targetReps}</p>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Current Exercise</label>
+                      <p className="text-xl font-bold text-gray-900">{exercise_name || currentExercise || 'None Selected'}</p>
+                      <p className="text-sm text-gray-500 mt-2">Select an assigned exercise above or choose from available exercises below</p>
+                    </div>
+                  )}
                   
                   <div>
                     <label className="text-sm font-medium text-gray-600">Real-time Score</label>
@@ -568,7 +871,7 @@ export default function PatientDailyProgress() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900 flex items-center">
                 <BarChart3 className="w-6 h-6 text-indigo-600 mr-2" />
-                Weekly Progress
+                Weekly Progress Analytics
               </h2>
               <div className="flex space-x-2">
                 {(['week', 'month', 'all'] as const).map((timeframe) => (
@@ -587,27 +890,101 @@ export default function PatientDailyProgress() {
               </div>
             </div>
             
-            <div className="grid grid-cols-7 gap-4 mb-4">
-              {weeklyProgress.map((day, index) => (
-                <div key={day.date} className="text-center">
-                  <div className="text-xs font-medium text-gray-500 mb-2">
-                    {new Date(day.date).toLocaleDateString('en', { weekday: 'short' })}
+            {dailyProgress?.analytics ? (
+              <>
+                {/* Summary Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                  <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
+                    <TrendingUp className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                    <p className="text-2xl font-bold text-gray-900">{dailyProgress.analytics.totalExercises}</p>
+                    <p className="text-sm text-gray-600">Total Exercises</p>
                   </div>
-                  <div className="bg-gray-100 rounded-lg p-3 space-y-2">
-                    <div className="text-xs text-gray-600">Accuracy</div>
-                    <div className="text-lg font-bold text-gray-900">{day.accuracy}%</div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-blue-500 h-2 rounded-full"
-                        style={{ width: `${day.accuracy}%` }}
-                      ></div>
-                    </div>
+                  <div className="text-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg">
+                    <Clock className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                    <p className="text-2xl font-bold text-gray-900">{Math.round(dailyProgress.analytics.totalTime / 60)}m</p>
+                    <p className="text-sm text-gray-600">Total Time</p>
+                  </div>
+                  <div className="text-center p-4 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg">
+                    <Star className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+                    <p className="text-2xl font-bold text-gray-900">{Math.round(dailyProgress.analytics.averageAccuracy)}%</p>
+                    <p className="text-sm text-gray-600">Avg Accuracy</p>
+                  </div>
+                  <div className="text-center p-4 bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg">
+                    <Target className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+                    <p className="text-2xl font-bold text-gray-900">{Object.keys(dailyProgress.analytics.exerciseFrequency).length}</p>
+                    <p className="text-sm text-gray-600">Exercise Types</p>
                   </div>
                 </div>
-              ))}
-            </div>
+
+                {/* Weekly Progress Grid */}
+                <div className="grid grid-cols-7 gap-4 mb-4">
+                  {dailyProgress.analytics.weeklyProgress.map((week: any, index: number) => (
+                    <div key={index} className="text-center">
+                      <div className="text-xs font-medium text-gray-500 mb-2">
+                        Week {index + 1}
+                      </div>
+                      <div className="bg-gray-100 rounded-lg p-3 space-y-2">
+                        <div className="text-xs text-gray-600">Exercises</div>
+                        <div className="text-lg font-bold text-gray-900">{week.exercises}</div>
+                        <div className="text-xs text-gray-600">Accuracy</div>
+                        <div className="text-sm font-bold text-gray-900">{Math.round(week.accuracy)}%</div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-500 h-2 rounded-full"
+                            style={{ width: `${Math.round(week.accuracy)}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Exercise Frequency */}
+                {Object.keys(dailyProgress.analytics.exerciseFrequency).length > 0 && (
+                  <div className="mt-6">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4">Exercise Frequency</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {Object.entries(dailyProgress.analytics.exerciseFrequency).map(([exerciseName, count]) => (
+                        <div key={exerciseName} className="bg-gray-50 rounded-lg p-4 text-center">
+                          <p className="font-semibold text-gray-900">{exerciseName}</p>
+                          <p className="text-2xl font-bold text-indigo-600">{count as number}</p>
+                          <p className="text-sm text-gray-600">sessions</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Progress Data Yet</h3>
+                <p className="text-gray-600">Complete some exercises to see your progress analytics here.</p>
+              </div>
+            )}
           </div>
         </motion.div>
+
+        {/* Error Display */}
+        {dbError && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <p className="text-red-700">{dbError}</p>
+                <button
+                  onClick={clearDbError}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   )
