@@ -22,6 +22,8 @@ export default function ExerciseExecution() {
   const [error, setError] = useState<string | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
+
+  const websocketUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:8000';
   const {
     isConnected,
     sessionId,
@@ -52,7 +54,7 @@ export default function ExerciseExecution() {
     clearError,
     analyzeFrame,
     speakFeedback
-  } = usePostureAnalysis();
+  } = usePostureAnalysis(websocketUrl);
 
   const videoRefs = useCallback((node: HTMLVideoElement) => {
     if (node) {

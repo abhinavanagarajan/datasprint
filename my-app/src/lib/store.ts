@@ -141,7 +141,7 @@ export const useStore = create<AppState>((set) => ({
       const today = new Date().toISOString().split('T')[0]
       const existingProgressIndex = state.progress.findIndex(p => p.date === today)
       
-      let updatedProgress = [...state.progress]
+      const updatedProgress = [...state.progress]
       
       if (existingProgressIndex >= 0) {
         updatedProgress[existingProgressIndex] = {
