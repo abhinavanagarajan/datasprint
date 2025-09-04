@@ -4,9 +4,12 @@
 import { useParams } from 'next/navigation'
 import { useStore } from '@/lib/store'
 import PoseFeedback from '@/components/PoseFeedback'
+import { usePostureAnalysis } from "@/hooks/usePostureAnalysis";
+import  PaperDoll  from "@/components/PaperDoll";
 import { motion } from 'framer-motion'
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { CheckCircle, Play, Pause, RotateCcw } from 'lucide-react'
+import { CheckCircle, Play, Pause, ChevronLeft, ChevronRight } from 'lucide-react'
+import { video } from 'framer-motion/client';
 
 export default function ExerciseExecution() {
   const params = useParams()
@@ -19,13 +22,39 @@ export default function ExerciseExecution() {
   const [error, setError] = useState<string | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
-  const videoRef = useCallback((node: HTMLVideoElement) => {
-    if (node !== null) {
+  const {
+    isConnected,
+    sessionId,
+    currentExercise,
+    availableExercises,
+    lastResult,
+    errors,
+    isAnalyzing,
+    imageSrc,
+    landmarks,
+    videoRef,
+    canvasRef,
+    connect,
+    disconnect,
+    startCamera,
+    stopCamera,
+    startAnalysis,
+    stopAnalysis,
+    changeExercise,
+    clearError,
+    analyzeFrame,
+    speakFeedback
+  } = usePostureAnalysis();
+
+  const videoRefs = useCallback((node: HTMLVideoElement) => {
+    if (node) {
       setVideoElement(node);
+      videoRef.current = node;
+      console.log('Video ref set', videoRef.current);
     }
   }, [])
 
-  const startCamera = async () => {
+  const startCameras = async () => {
     try {
       setError(null);
       
@@ -42,10 +71,9 @@ export default function ExerciseExecution() {
           facingMode: 'user'
         }
       });
-
       // Store stream reference
       streamRef.current = stream;
-
+      
       // Set up video element
       if (videoElement) {
         videoElement.srcObject = stream;
@@ -64,8 +92,28 @@ export default function ExerciseExecution() {
       setError(err.message || 'Failed to access camera');
       setHasPermission(false);
     }
+    //startCamera();
   };
 
+  useEffect(() => {
+    connect();       // ✅ establish websocket session
+    startCameras();   // ✅ request camera access
+    console.log('isConnected',isConnected);
+  
+    return () => {
+      stopAnalysis();
+      stopCamera();
+      disconnect();
+    };
+  }, [startCamera]);
+
+  useEffect(() => {
+    if (isConnected === true && !isAnalyzing) {
+      startAnalysis();
+    }
+  }, [isConnected, isAnalyzing, startAnalysis]);
+  
+  
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -101,24 +149,24 @@ export default function ExerciseExecution() {
   }
   
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-7xl max-h-screen mx-auto px-4 py-8">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <h1 className="text-3xl font-bold text-gray-900">{exercise.title}</h1>
+        <h1 className="text-3xl font-bold text-gray-200">{exercise.title}</h1>
         <p className="text-gray-600 mt-2">{exercise.description}</p>
       </motion.div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-h-screen">
         {/* Video and feedback section */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <div className="relative w-full h-[480px] bg-gray-100 rounded-lg overflow-hidden">
+          {/* <div className="relative w-full h-[480px] bg-gray-100 rounded-lg overflow-hidden">
             {!hasPermission ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
                 <p className="text-gray-500">{error || 'Camera access required'}</p>
@@ -156,7 +204,37 @@ export default function ExerciseExecution() {
             <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
               {hasPermission ? 'Camera Active' : 'Camera Inactive'}
             </div>
+          </div> */}
+
+          <div className="relative w-full h-[720px] bg-gray-100 rounded-lg overflow-hidden">
+            <PaperDoll landmarks={landmarks} />
+
+            
+            {!hasPermission && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/50">
+                <p className="text-gray-200">{error || 'Camera access required'}</p>
+                <button
+                  onClick={startCameras}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                >
+                  Start Camera
+                </button>
+              </div>
+            )}
+
+            {error && (
+              <div className="absolute top-2 left-2 right-2 bg-red-500 text-white px-3 py-2 rounded text-sm">
+                {error}
+              </div>
+            )}
+
+            <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+              {hasPermission ? 'Camera Active' : 'Camera Inactive'}
+            </div>
           </div>
+
+
+
         </motion.div>
         
         {/* Instructions and controls section */}
@@ -166,7 +244,7 @@ export default function ExerciseExecution() {
           transition={{ delay: 0.2 }}
           className="bg-white p-6 rounded-xl shadow-md"
         >
-          <h2 className="text-xl font-semibold mb-4">Instructions</h2>
+          <h2 className="text-xl font-semibold text-gray-600 mb-4">Instructions</h2>
           
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
@@ -175,9 +253,9 @@ export default function ExerciseExecution() {
                 <button 
                   onClick={() => setCurrentStep(prev => Math.max(0, prev - 1))}
                   disabled={currentStep === 0}
-                  className="p-2 bg-gray-100 rounded-lg disabled:opacity-50"
+                  className="p-2 rounded-lg disabled:opacity-50"
                 >
-                  <RotateCcw className="h-5 w-5" />
+                  <ChevronLeft className="h-5 w-5 text-gray-400" />
                 </button>
                 <button 
                   onClick={() => setIsPlaying(prev => !prev)}
@@ -188,9 +266,9 @@ export default function ExerciseExecution() {
                 <button 
                   onClick={() => setCurrentStep(prev => Math.min(exercise.instructions.length - 1, prev + 1))}
                   disabled={currentStep === exercise.instructions.length - 1}
-                  className="p-2 bg-gray-100 rounded-lg disabled:opacity-50"
+                  className="p-2  rounded-lg disabled:opacity-50"
                 >
-                  <RotateCcw className="h-5 w-5 transform rotate-180" />
+                  <ChevronRight className="h-5 w-5 text-gray-400 " />
                 </button>
               </div>
             </div>
@@ -212,15 +290,15 @@ export default function ExerciseExecution() {
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="bg-gray-50 p-3 rounded-lg text-center">
               <div className="text-sm text-gray-500">Sets</div>
-              <div className="text-lg font-semibold">{exercise.sets}</div>
+              <div className="text-lg text-gray-800 font-semibold">{exercise.sets}</div>
             </div>
             <div className="bg-gray-50 p-3 rounded-lg text-center">
               <div className="text-sm text-gray-500">Reps</div>
-              <div className="text-lg font-semibold">{exercise.reps}</div>
+              <div className="text-lg text-gray-800 font-semibold">{exercise.reps}</div>
             </div>
             <div className="bg-gray-50 p-3 rounded-lg text-center">
               <div className="text-sm text-gray-500">Duration</div>
-              <div className="text-lg font-semibold">{exercise.duration}s</div>
+              <div className="text-lg text-gray-800 font-semibold">{exercise.duration}s</div>
             </div>
           </div>
           
@@ -231,6 +309,30 @@ export default function ExerciseExecution() {
             <CheckCircle className="h-5 w-5 mr-2" />
             Complete Exercise
           </button>
+          {/* <div className="rounded-full mt-5">
+          {imageSrc ? (
+            <img src={imageSrc} alt="From hook" className="w-full h-full object-cover rounded" />
+          ) : (
+            <p>No image yet</p>
+          )}
+          </div> */}
+          <div className="rounded-full mt-5 w-auto h-auto">
+            
+            <video
+              ref={videoRefs}
+              autoPlay
+              playsInline
+              muted
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+                backgroundColor: 'black'
+              }}
+            />
+            <canvas ref={canvasRef} style={{ display: 'none' }} />
+          </div>
         </motion.div>
       </div>
       
@@ -247,13 +349,16 @@ export default function ExerciseExecution() {
             className="bg-white p-8 rounded-xl text-center max-w-md"
           >
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold mb-2">Exercise Completed!</h3>
+            <h3 className="text-2xl text-gray-600 font-bold mb-2">Exercise Completed!</h3>
             <p className="text-gray-600 mb-4">Great job completing {exercise.title}!</p>
             <button 
-              onClick={() => setShowCompletion(false)}
+              onClick={() => {
+                window.location.href = "/patient/dashboard";
+                setShowCompletion(false);
+              }}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium"
             >
-              Continue
+              Continue 
             </button>
           </motion.div>
         </motion.div>

@@ -27,7 +27,7 @@ const Charts = ({ data, type = 'line' }: ChartsProps) => {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="completed" stroke="#8884d8" activeDot={{ r: 8 }} />
+          <Line type="monotone" dataKey="completed" stroke="#8884d8" />
           <Line type="monotone" dataKey="timeSpent" stroke="#82ca9d" />
           <Line type="monotone" dataKey="accuracy" stroke="#ffc658" />
         </LineChart>

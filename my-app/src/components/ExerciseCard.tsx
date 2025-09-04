@@ -26,7 +26,7 @@ const ExerciseCard = ({ exercise, showButton = true }: ExerciseCardProps) => {
       <div className="h-40 bg-gradient-to-r from-blue-100 to-purple-100 relative">
         <div className="absolute top-3 right-3">
           <span className={`px-3 py-1 rounded-full text-xs font-medium ${difficultyColors[exercise.difficulty]}`}>
-            {exercise.difficulty}
+            {exercise.difficulty.toUpperCase()}
           </span>
         </div>
         
@@ -38,7 +38,7 @@ const ExerciseCard = ({ exercise, showButton = true }: ExerciseCardProps) => {
       </div>
       
       <div className="p-5">
-        <h3 className="font-semibold text-lg mb-2">{exercise.title}</h3>
+        <h3 className="font-semibold text-gray-800 text-lg mb-2">{exercise.title}</h3>
         <p className="text-gray-600 text-sm mb-4">{exercise.description}</p>
         
         <div className="flex justify-between items-center mb-4">
