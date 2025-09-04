@@ -57,7 +57,9 @@ export default function ExerciseExecution() {
   const videoRefs = useCallback((node: HTMLVideoElement) => {
     if (node) {
       setVideoElement(node);
-      videoRef.current = node;
+      if (videoRef.current !== node) {
+        videoRef.current = node;
+      }
       console.log('Video ref set', videoRef.current);
     }
   }, [])
