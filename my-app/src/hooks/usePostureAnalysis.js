@@ -11,6 +11,15 @@ export const usePostureAnalysis = (serverUrl = 'ws://localhost:8000') => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [imageSrc, setImageSrc] = useState(null);
   const [landmarks, setLandmarks] = useState(null);
+  const [success, setSuccess] = useState(null)
+  const [score, setScore] = useState(0)
+  const [is_correct, setIsCorrect] = useState(null)
+  const [exercise_name, setExerciseName] = useState('')
+  const [feedback_messages, setFeedbackMessages] = useState([])
+  const [audio_feedback, setAudioFeedback] = useState(null)
+  const [annotated_frame, setAnnotatedFrame] = useState('')
+  const [individual_scores, setIndividualScores] = useState({})
+  
   
   const wsRef = useRef(null);
   const videoRef = useRef(null);
@@ -97,6 +106,16 @@ export const usePostureAnalysis = (serverUrl = 'ws://localhost:8000') => {
     const imgbase = message.data.annotated_frame;
     setImageSrc(imgbase);
     setLandmarks(message.data.landmarks);
+
+    setSuccess(message.data.success)
+    setScore(message.data.score)
+    setIsCorrect(message.data.is_correct)
+    setExerciseName(message.data.exercise_name)
+    setFeedbackMessages(message.data.feedback_messages)
+    setAudioFeedback(message.data.audio_feedback)
+    setAnnotatedFrame(message.data.annotated_frame)
+    setIndividualScores(message.data.individual_scores)
+
 
     switch (type) {
       case 'session_info':
@@ -277,6 +296,14 @@ export const usePostureAnalysis = (serverUrl = 'ws://localhost:8000') => {
     isAnalyzing,
     imageSrc,
     landmarks,
+    success,
+    score,
+    is_correct,
+    exercise_name,
+    feedback_messages,
+    audio_feedback,
+    annotated_frame,
+    individual_scores,
     
     // Refs for components
     videoRef,

@@ -32,6 +32,14 @@ export default function ExerciseExecution() {
     isAnalyzing,
     imageSrc,
     landmarks,
+    success,
+    score,
+    is_correct,
+    exercise_name,
+    feedback_messages,
+    audio_feedback,
+    annotated_frame,
+    individual_scores,
     videoRef,
     canvasRef,
     connect,
@@ -159,7 +167,7 @@ export default function ExerciseExecution() {
         <p className="text-gray-600 mt-2">{exercise.description}</p>
       </motion.div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-h-screen">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-h-screen">
         {/* Video and feedback section */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
@@ -309,13 +317,7 @@ export default function ExerciseExecution() {
             <CheckCircle className="h-5 w-5 mr-2" />
             Complete Exercise
           </button>
-          {/* <div className="rounded-full mt-5">
-          {imageSrc ? (
-            <img src={imageSrc} alt="From hook" className="w-full h-full object-cover rounded" />
-          ) : (
-            <p>No image yet</p>
-          )}
-          </div> */}
+          
           <div className="rounded-full mt-5 w-auto h-auto">
             
             <video
@@ -331,8 +333,27 @@ export default function ExerciseExecution() {
                 backgroundColor: 'black'
               }}
             />
+            
             <canvas ref={canvasRef} style={{ display: 'none' }} />
           </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}>
+
+          <PoseFeedback
+            success={success}
+            score={score}
+            is_correct={is_correct}
+            exercise_name={exercise_name}
+            feedback_messages={feedback_messages}
+            audio_feedback={audio_feedback}
+            annotated_frame={annotated_frame}
+            individual_scores={individual_scores}
+            landmarks={landmarks}
+          />
+ 
         </motion.div>
       </div>
       
