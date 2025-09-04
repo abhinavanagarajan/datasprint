@@ -102,7 +102,7 @@ export const usePostureAnalysis = (serverUrl = 'ws://localhost:8000') => {
   // Handle WebSocket messages
   const handleWebSocketMessage = useCallback((message) => {
     const { type, data } = message;
-    console.log('Received message:', message);
+    //console.log('Received message:', message);
     const imgbase = message.data.annotated_frame;
     setImageSrc(imgbase);
     setLandmarks(message.data.landmarks);
@@ -197,7 +197,7 @@ export const usePostureAnalysis = (serverUrl = 'ws://localhost:8000') => {
         console.warn('Video or canvas ref not available',videoRef.current);
         return null;
       }
-      console.log('Capturing frame');
+      //console.log('Capturing frame');
     
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -213,7 +213,7 @@ export const usePostureAnalysis = (serverUrl = 'ws://localhost:8000') => {
 
   // Send frame for analysis
   const analyzeFrame = useCallback(() => {
-    console.log('Analyzing frame');
+    //console.log('Analyzing frame');
     if (!wsRef.current || !isConnected) return;
     
     const frameData = captureFrame();
@@ -225,13 +225,13 @@ export const usePostureAnalysis = (serverUrl = 'ws://localhost:8000') => {
         frame: frameData
       }
     };
-    console.log('Sending frame for analysis',message);
+    //console.log('Sending frame for analysis',message);
     wsRef.current.send(JSON.stringify(message));
   }, [isConnected, captureFrame]);
 
   // Start real-time analysis
   const startAnalysis = useCallback(() => {
-    console.log('Starting analysis');
+    //console.log('Starting analysis');
     if (analysisIntervalRef.current) {
       clearInterval(analysisIntervalRef.current);
     }

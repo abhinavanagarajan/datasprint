@@ -141,7 +141,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
         
         while True:
             # Receive message from client
-            logger.info(f"Waiting for message from session: {session_id}")
+            #logger.info(f"Waiting for message from session: {session_id}")
             try:
                 data = await websocket.receive_text()
                 message = json.loads(data)
