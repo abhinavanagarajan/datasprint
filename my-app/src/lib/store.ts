@@ -61,7 +61,7 @@ const dummyExercises: Exercise[] = [
     sets: 3,
     duration: 30,
     completed: 0,
-    thumbnail: '/exercises/arm-curl.jpg',
+    thumbnail: '/exercises/arm-curl.png',
     instructions: [
       'Hold weights in both hands',
       'Keep elbows close to your body',
@@ -78,13 +78,135 @@ const dummyExercises: Exercise[] = [
     sets: 3,
     duration: 45,
     completed: 0,
-    thumbnail: '/exercises/shoulder-press.jpg',
+    thumbnail: '/exercises/shoulder-press.png',
     instructions: [
       'Sit or stand with weights at shoulder level',
       'Press weights upward until arms are fully extended',
       'Slowly lower back to starting position'
     ]
+  },
+  {
+    id: '3',
+    title: 'Shoulder Raise',
+    description: 'Raise both arms overhead to improve shoulder mobility and strength',
+    difficulty: 'medium',
+    reps: 10,
+    sets: 3,
+    duration: 40,
+    completed: 0,
+    thumbnail: '/exercises/shoulder-raise.png',
+    instructions: [
+      'Stand with feet shoulder-width apart',
+      'Raise both arms straight overhead until fully extended',
+      'Keep shoulders level and avoid leaning',
+      'Lower arms slowly back to the starting position'
+    ]
+  },
+  {
+    id: '4',
+    title: 'Left Arm Raise',
+    description: 'Raise your left arm to shoulder height or above while keeping posture aligned',
+    difficulty: 'easy',
+    reps: 12,
+    sets: 3,
+    duration: 30,
+    completed: 0,
+    thumbnail: '/exercises/left-arm-raise.png',
+    instructions: [
+      'Stand upright with arms relaxed at your sides',
+      'Lift your left arm straight out to the side until shoulder height or above',
+      'Keep shoulders level, avoid leaning',
+      'Right arm should remain relaxed at your side',
+      'Slowly return to the starting position'
+    ]
+  },
+  {
+    id: '5',
+    title: 'Right Arm Raise',
+    description: 'Raise your right arm to shoulder height or above while keeping posture aligned',
+    difficulty: 'easy',
+    reps: 12,
+    sets: 3,
+    duration: 30,
+    completed: 0,
+    thumbnail: '/exercises/right-arm-raise.png',
+    instructions: [
+      'Stand upright with arms relaxed at your sides',
+      'Lift your right arm straight out to the side until shoulder height or above',
+      'Keep shoulders level, avoid leaning',
+      'Left arm should remain relaxed at your side',
+      'Slowly return to the starting position'
+    ]
+  },
+  {
+    id: '6',
+    title: 'Squat',
+    description: 'Perform squats to strengthen the legs and maintain back posture',
+    difficulty: 'hard',
+    reps: 15,
+    sets: 4,
+    duration: 60,
+    completed: 0,
+    thumbnail: '/exercises/squat.png',
+    instructions: [
+      'Stand with feet shoulder-width apart',
+      'Bend knees to lower your body until thighs are parallel to the ground',
+      'Keep knees aligned with toes and back straight',
+      'Push back up through your heels to return to standing position'
+    ]
+  },
+  {
+    id: '7',
+    title: 'Arm Stretch',
+    description: 'Extend both arms outward to improve flexibility and posture',
+    difficulty: 'easy',
+    reps: 8,
+    sets: 2,
+    duration: 20,
+    completed: 0,
+    thumbnail: '/exercises/arm-stretch.png',
+    instructions: [
+      'Stand upright with arms by your sides',
+      'Raise both arms outward until they are perpendicular to your body',
+      'Keep arms straight and extended',
+      'Hold for a few seconds, then relax'
+    ]
+  },
+  {
+    id: '8',
+    title: 'Standing Balance',
+    description: 'Maintain upright posture to strengthen balance and stability',
+    difficulty: 'medium',
+    reps: 5,
+    sets: 2,
+    duration: 60,
+    completed: 0,
+    thumbnail: '/exercises/standing-balance.png',
+    instructions: [
+      'Stand upright with feet hip-width apart',
+      'Keep shoulders level and aligned with hips',
+      'Maintain posture without leaning for the set duration',
+      'Focus forward to stabilize balance'
+    ]
+  },
+  {
+    id: '9',
+    title: 'Neck Rotation',
+    description: 'Rotate neck gently to improve flexibility and reduce stiffness',
+    difficulty: 'easy',
+    reps: 10,
+    sets: 2,
+    duration: 30,
+    completed: 0,
+    thumbnail: '/exercises/neck-rotation.png',
+    instructions: [
+      'Sit or stand upright',
+      'Slowly rotate head to the left until aligned with shoulder',
+      'Return to center and rotate to the right',
+      'Keep shoulders stable throughout movement'
+    ]
   }
+  
 ]
 
 const dummyProgress: ProgressData[] = [

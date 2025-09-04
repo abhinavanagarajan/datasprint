@@ -193,7 +193,11 @@ export default function PatientExercises() {
                   </div>
                   
                   <Link 
-                    href={`/patient/exercises/${exercise.name.toLowerCase().replace(/\s+/g, '-')}`}
+                    href={`/patient/exercises/${
+                      exercises.find(e => 
+                        e.title.toLowerCase() === exercise.name.toLowerCase()
+                      )?.id ?? ''
+                    }`}
                     className="mt-4 w-full block text-center px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all duration-300"
                   >
                     Start Exercise
