@@ -130,7 +130,7 @@ export default function Home() {
             <SignedIn>
               <div className="flex gap-6 items-center">
                 <Link 
-                  href="/patient/dashboard" 
+                  href="/patient/injury-report" 
                   className="group relative px-12 py-6 rounded-full font-bold text-xl transition-all duration-500 overflow-hidden portal-button"
                 >
                   {/* Rotating border effect */}
