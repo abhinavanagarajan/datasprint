@@ -4,7 +4,7 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Exercise } from '@/lib/store'
-import { Clock, BarChart3, Trophy } from 'lucide-react'
+import { Clock, BarChart3, Trophy, Glasses } from 'lucide-react'
 
 interface ExerciseCardProps {
   exercise: Exercise
@@ -24,7 +24,17 @@ const ExerciseCard = ({ exercise, showButton = true }: ExerciseCardProps) => {
       className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100"
     >
       <div className="h-40 bg-gradient-to-r from-blue-100 to-purple-100 relative">
-        <div className="absolute top-3 right-3">
+          <div className="absolute top-3 right-3 flex gap-2 z-10">
+          {exercise.vrSupported && (
+            <Link
+              href={`/patient/exercises/${exercise.id}/vr`}
+              className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full p-1.5 shadow-sm hover:from-purple-600 hover:to-indigo-700 transition-all duration-200 hover:scale-110 z-20 relative cursor-pointer"
+              title="Start VR Mode"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Glasses className="h-3 w-3 pointer-events-none" />
+            </Link>
+          )}
           <span className={`px-3 py-1 rounded-full text-xs font-medium ${difficultyColors[exercise.difficulty]}`}>
             {exercise.difficulty.toUpperCase()}
           </span>
