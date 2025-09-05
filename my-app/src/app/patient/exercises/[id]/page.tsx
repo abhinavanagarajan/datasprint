@@ -378,7 +378,7 @@ export default function ExerciseExecution() {
             <p className="text-gray-600 mb-4">Great job completing {exercise.title}!</p>
             <button 
               onClick={() => {
-                window.location.href = "/patient/dashboard";
+                window.location.href = "/patient/daily-progress";
                 setShowCompletion(false);
               }}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium"
