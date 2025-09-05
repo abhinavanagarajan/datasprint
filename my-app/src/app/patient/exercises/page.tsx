@@ -6,7 +6,7 @@ import ExerciseCard from '@/components/ExerciseCard'
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, FileText, Brain, AlertCircle } from 'lucide-react'
+import { ArrowLeft, FileText, Brain, AlertCircle, Glasses } from 'lucide-react'
 
 interface RecommendedExercise {
   name: string
@@ -137,13 +137,23 @@ export default function PatientExercises() {
             <p className="text-blue-200">Personalized rehabilitation based on your injury report</p>
           </div>
           
-          <Link 
-            href="/patient/injury-report"
-            className="flex items-center space-x-2 px-4 py-2 bg-slate-700/50 border border-cyan-400/30 rounded-lg text-cyan-300 hover:bg-slate-700 transition-colors"
-          >
-            <FileText className="w-4 h-4" />
-            <span>Update Report</span>
-          </Link>
+          <div className="flex items-center gap-4">
+            {/* VR Mode Button */}
+            <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600/20 to-indigo-600/20 border border-purple-500/30 rounded-lg">
+              <Glasses className="w-4 h-4 text-purple-400" />
+              <span className="text-purple-300 text-sm font-medium">
+                {exercises.filter(ex => ex.vrSupported).length} VR Exercises Available
+              </span>
+            </div>
+
+            <Link 
+              href="/patient/injury-report"
+              className="flex items-center space-x-2 px-4 py-2 bg-slate-700/50 border border-cyan-400/30 rounded-lg text-cyan-300 hover:bg-slate-700 transition-colors"
+            >
+              <FileText className="w-4 h-4" />
+              <span>Update Report</span>
+            </Link>
+          </div>
         </motion.div>
 
         {/* AI Recommendations */}
@@ -169,7 +179,19 @@ export default function PatientExercises() {
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <h3 className="text-xl font-bold text-cyan-300">{exercise.name}</h3>
+                    <div className="flex items-center space-x-2">
+                      <h3 className="text-xl font-bold text-cyan-300">{exercise.name}</h3>
+                      {/* Check if exercise supports VR by matching with existing exercises */}
+                      {exercises.find(e => e.title.toLowerCase() === exercise.name.toLowerCase())?.vrSupported && (
+                        <Link
+                          href={`/patient/exercises/${exercises.find(e => e.title.toLowerCase() === exercise.name.toLowerCase())?.id}/vr`}
+                          className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-full p-1 hover:from-purple-600 hover:to-indigo-700 transition-all duration-200 hover:scale-110 cursor-pointer"
+                          title="Start VR Mode"
+                        >
+                          <Glasses className="h-3 w-3 pointer-events-none" />
+                        </Link>
+                      )}
+                    </div>
                     <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300">
                       {(exercise.confidence * 100).toFixed(0)}% Match
                     </span>

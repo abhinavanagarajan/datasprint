@@ -12,6 +12,7 @@ import {
   PlayCircle, PauseCircle, RotateCcw, Camera, Video, Wifi, WifiOff,
   Volume2, VolumeX, User, BookOpen, Star, TrendingUp
 } from 'lucide-react'
+import AIChatbot from '@/components/AIChatbot'
 
 interface DailyGoal {
   type: 'exercises' | 'time' | 'accuracy'
@@ -986,6 +987,13 @@ export default function PatientDailyProgress() {
           </motion.div>
         )}
       </div>
+
+      {/* AI Chatbot - Fixed Position */}
+      <AIChatbot 
+        patientId={currentPatient?.id}
+        position="fixed"
+        theme="light"
+      />
     </div>
   )
 }

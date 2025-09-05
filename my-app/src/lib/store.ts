@@ -12,6 +12,7 @@ export interface Exercise {
   completed: number
   thumbnail: string
   instructions: string[]
+  vrSupported?: boolean // New VR support flag
 }
 
 export interface ProgressData {
@@ -95,6 +96,7 @@ const dummyExercises: Exercise[] = [
     duration: 40,
     completed: 0,
     thumbnail: '/exercises/shoulder-raise.png',
+    vrSupported: true, // VR available
     instructions: [
       'Stand with feet shoulder-width apart',
       'Raise both arms straight overhead until fully extended',
@@ -148,6 +150,7 @@ const dummyExercises: Exercise[] = [
     duration: 60,
     completed: 0,
     thumbnail: '/exercises/squat.png',
+    vrSupported: true, // VR available
     instructions: [
       'Stand with feet shoulder-width apart',
       'Bend knees to lower your body until thighs are parallel to the ground',
