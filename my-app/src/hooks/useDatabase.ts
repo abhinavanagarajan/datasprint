@@ -1,7 +1,7 @@
 // hooks/useDatabase.ts
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useUser } from '@clerk/nextjs'
 
 interface Patient {
@@ -93,6 +93,9 @@ export const useDatabase = () => {
   const { user } = useUser()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Simple in-memory caches to avoid duplicate network calls within a session
+  const therapistCache = useRef<Therapist | null>(null)
+  const exercisesCache = useRef<Exercise[] | null>(null)
 
   // Patient methods
   const createPatient = async (patientData: {
@@ -210,18 +213,17 @@ export const useDatabase = () => {
   }
 
   const getTherapist = async (): Promise<Therapist | null> => {
+    if (therapistCache.current) return therapistCache.current
     setLoading(true)
     setError(null)
-    
     try {
       const response = await fetch('/api/therapists')
-
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.error || 'Failed to fetch therapist')
       }
-
       const { therapist } = await response.json()
+      therapistCache.current = therapist
       return therapist
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
@@ -233,19 +235,18 @@ export const useDatabase = () => {
 
   // Exercise methods
   const getAllExercises = async (): Promise<Exercise[]> => {
+    if (exercisesCache.current) return exercisesCache.current
     setLoading(true)
     setError(null)
-    
     try {
       const response = await fetch('/api/exercises')
-
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.error || 'Failed to fetch exercises')
       }
-
       const { exercises } = await response.json()
-      return exercises || []
+  exercisesCache.current = exercises || []
+  return exercisesCache.current || []
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
       return []
