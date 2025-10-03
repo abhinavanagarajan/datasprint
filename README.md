@@ -9,3 +9,5 @@ Create venv
 3.`pip install -r requirements.txt`
 
 4.`python3 main.py`
+
+-Won YuvaAIThon
